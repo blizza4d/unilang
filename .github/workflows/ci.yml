@@ -1,0 +1,74 @@
+name: DataNova Extract CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  backend-test:
+    name: Backend Unit & Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install System Dependencies (Poppler)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Pytest Test Suite
+        working-directory: backend
+        env:
+          DATANOVA_SKIP_KEY_VALIDATION: "true"
+          OPENAI_API_KEY: "mock-test-key"
+          GOOGLE_API_KEY: "mock-test-key"
+        run: |
+          pytest tests --cov=. --cov-report=term-missing
+
+      - name: Run Benchmark Evaluation Gate
+        working-directory: backend
+        run: |
+          python eval/run_eval.py
+          python eval/check_thresholds.py
+
+  frontend-build:
+    name: Frontend Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: TypeScript Typecheck
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Next.js Production Build
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: "http://localhost:8000"
+        run: npm run build

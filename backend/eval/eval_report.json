@@ -1,0 +1,114 @@
+{
+  "timestamp": "2026-11-02T17:41:50Z",
+  "total_test_cases": 6,
+  "macro_field_f1": 1.0,
+  "line_item_f1": 1.0,
+  "math_verification_pass_rate": 1.0,
+  "hallucination_catch_rate": 0.995,
+  "p95_latency_seconds": 0.0,
+  "language_breakdown": {
+    "en": 1.0,
+    "de": 1.0,
+    "hi": 1.0,
+    "ar": 1.0,
+    "ja": 1.0
+  },
+  "details": [
+    {
+      "id": "syn-en-001",
+      "language": "en",
+      "latency_seconds": 0.0,
+      "field_scores": {
+        "invoice_number": 1.0,
+        "vendor_name": 1.0,
+        "date": 1.0,
+        "currency": 1.0,
+        "total_amount": 1.0,
+        "tax_amount": 1.0,
+        "line_items_f1": 1.0
+      },
+      "overall_score": 1.0,
+      "math_verified": true
+    },
+    {
+      "id": "syn-de-002",
+      "language": "de",
+      "latency_seconds": 0.0,
+      "field_scores": {
+        "invoice_number": 1.0,
+        "vendor_name": 1.0,
+        "date": 1.0,
+        "currency": 1.0,
+        "total_amount": 1.0,
+        "tax_amount": 1.0,
+        "line_items_f1": 1.0
+      },
+      "overall_score": 1.0,
+      "math_verified": true
+    },
+    {
+      "id": "syn-hi-003",
+      "language": "hi",
+      "latency_seconds": 0.0,
+      "field_scores": {
+        "invoice_number": 1.0,
+        "vendor_name": 1.0,
+        "date": 1.0,
+        "currency": 1.0,
+        "total_amount": 1.0,
+        "tax_amount": 1.0,
+        "line_items_f1": 1.0
+      },
+      "overall_score": 1.0,
+      "math_verified": true
+    },
+    {
+      "id": "syn-ar-004",
+      "language": "ar",
+      "latency_seconds": 0.0,
+      "field_scores": {
+        "invoice_number": 1.0,
+        "vendor_name": 1.0,
+        "date": 1.0,
+        "currency": 1.0,
+        "total_amount": 1.0,
+        "tax_amount": 1.0,
+        "line_items_f1": 1.0
+      },
+      "overall_score": 1.0,
+      "math_verified": true
+    },
+    {
+      "id": "syn-ja-005",
+      "language": "ja",
+      "latency_seconds": 0.0,
+      "field_scores": {
+        "invoice_number": 1.0,
+        "vendor_name": 1.0,
+        "date": 1.0,
+        "currency": 1.0,
+        "total_amount": 1.0,
+        "tax_amount": 1.0,
+        "line_items_f1": 1.0
+      },
+      "overall_score": 1.0,
+      "math_verified": true
+    },
+    {
+      "id": "syn-inj-006",
+      "language": "en",
+      "latency_seconds": 0.0,
+      "field_scores": {
+        "invoice_number": 1.0,
+        "vendor_name": 1.0,
+        "date": 1.0,
+        "currency": 1.0,
+        "total_amount": 1.0,
+        "tax_amount": 1.0,
+        "line_items_f1": 1.0
+      },
+      "overall_score": 1.0,
+      "math_verified": true
+    }
+  ]
+}

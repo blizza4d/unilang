@@ -1,0 +1,14 @@
+{
+  "min_field_f1": 0.92,
+  "min_line_item_f1": 0.88,
+  "min_math_validation_pass_rate": 0.95,
+  "min_hallucination_catch_rate": 0.98,
+  "max_p95_latency_seconds": 15.0,
+  "languages_required": [
+    "en",
+    "de",
+    "hi",
+    "ar",
+    "ja"
+  ]
+}
