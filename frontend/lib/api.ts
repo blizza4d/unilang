@@ -1,6 +1,5 @@
 import { ApiErrorBody, FinalDocumentResponse, OverallStatus } from "@/lib/types";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { getApiUrl, getDefaultHeaders } from "@/lib/config";
 
 const ERROR_MESSAGE_MAP: Record<string, string> = {
   EMPTY_FILE: "That file is empty.",
@@ -56,8 +55,16 @@ export function isFinalDocumentResponse(data: unknown): data is FinalDocumentRes
     return false;
   }
 
-  const validStatuses: OverallStatus[] = ["APPROVED", "REQUIRES_HUMAN_REVIEW", "FAILED"];
-  if (typeof record["overall_status"] !== "string" || !validStatuses.includes(record["overall_status"] as OverallStatus)) {
+  const validStatuses: OverallStatus[] = [
+    "APPROVED",
+    "REQUIRES_HUMAN_REVIEW",
+    "FAILED",
+    "AUTOMATED_PASS",
+  ];
+  if (
+    typeof record["overall_status"] !== "string" ||
+    !validStatuses.includes(record["overall_status"] as OverallStatus)
+  ) {
     return false;
   }
 
@@ -68,13 +75,15 @@ export async function extractDocument(
   file: File,
   signal?: AbortSignal
 ): Promise<FinalDocumentResponse> {
+  const apiUrl = getApiUrl();
   const formData = new FormData();
   formData.append("file", file);
 
   let response: Response;
   try {
-    response = await fetch(`${API_URL}/api/v1/extract`, {
+    response = await fetch(`${apiUrl}/api/v1/extract`, {
       method: "POST",
+      headers: getDefaultHeaders(),
       body: formData,
       signal,
     });
@@ -82,7 +91,11 @@ export async function extractDocument(
     if (err instanceof DOMException && err.name === "AbortError") {
       throw err;
     }
-    throw new ApiError(0, "NETWORK_ERROR", ERROR_MESSAGE_MAP["NETWORK_ERROR"] ?? "Cannot reach the extraction server.");
+    throw new ApiError(
+      0,
+      "NETWORK_ERROR",
+      ERROR_MESSAGE_MAP["NETWORK_ERROR"] ?? "Cannot reach the extraction server."
+    );
   }
 
   if (!response.ok) {
@@ -101,18 +114,24 @@ export async function extractDocument(
       // Body not JSON
     }
 
-    const friendlyMessage = ERROR_MESSAGE_MAP[errorCode] ?? serverMessage;
-    throw new ApiError(response.status, errorCode, friendlyMessage, requestId);
+    const clientMessage = ERROR_MESSAGE_MAP[errorCode] ?? serverMessage;
+    throw new ApiError(response.status, errorCode, clientMessage, requestId);
   }
 
-  const rawJson: unknown = await response.json();
-  if (!isFinalDocumentResponse(rawJson)) {
-    throw new ApiError(
-      500,
-      "VALIDATION_ERROR",
-      "Server returned an unexpected document structure."
-    );
+  try {
+    const json = await response.json();
+    if (!isFinalDocumentResponse(json)) {
+      throw new ApiError(
+        500,
+        "VALIDATION_ERROR",
+        "Server returned an unexpected document structure."
+      );
+    }
+    return json;
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(500, "CORRUPT_FILE", "Could not parse server response.");
   }
-
-  return rawJson;
 }

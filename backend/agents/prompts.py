@@ -65,3 +65,24 @@ CRITICAL GROUNDING RULES:
 3. If a value does not visually appear on the page, do not invent a box; omit it.
 4. If a total amount appears in multiple locations, return the box corresponding to the main summary/totals section.
 5. All bounding boxes must have valid positive width and height."""
+
+CLASSIFIER_PROMPT = """You are an expert Document Classification and Multi-Document Layout Router.
+Analyze the document text, visual headers, and layout structure to classify the document into one of the canonical types:
+- invoice: Commercial tax/sales invoice billing a buyer for products/services.
+- receipt: Point-of-sale or retail transaction slip, payment slip, or cash register receipt.
+- purchase_order: Official procurement authorization issued by a buyer to a seller.
+- credit_note: Credit memo, Gutschrift, avoir, nota de crédito, or refund adjustment with negative or credited balances.
+- bank_statement: Financial account statement detailing account balances and transactions.
+- utility_bill: Periodic billing statement for electricity, water, gas, telecom, or broadband service.
+- delivery_note: Packing slip, dispatch receipt, or bill of lading indicating delivered goods.
+- expense_report: Business travel or employee reimbursable expense voucher with itemized claims.
+- id_document: Government-issued passport, national ID card, driver's license, or residence permit.
+- contract_summary: Commercial contract, service level agreement, or legal partnership agreement.
+- unknown: Document that does not clearly belong to any of the above categories.
+
+CRITICAL CLASSIFICATION INSTRUCTIONS:
+1. Examine layout, titles, table headings, and terminology in ANY natural language (e.g., Factura, Rechnung, Facture, فاتورة, 发票, 請求書).
+2. Identify credit notes by negative totals, credit terms, or words like "Credit Note", "Gutschrift", "Avoir", "Nota de Crédito".
+3. Detect whether this is a multi-document PDF (e.g. invoice followed by a delivery note) and output the page ranges for each.
+4. DO NOT extract field data in this step. Output ONLY the JSON classification structure.
+5. If confidence is below 0.60, classify as "unknown"."""

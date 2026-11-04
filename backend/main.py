@@ -13,7 +13,7 @@ from db.session import init_db
 from middleware.rate_limit import RateLimitMiddleware
 from middleware.request_context import RequestContextMiddleware
 from middleware.security_headers import SecurityHeadersMiddleware
-from routers import batch, documents, eval as eval_router, exports, extract, health
+from routers import batch, documents, eval as eval_router, exports, extract, health, v3_extract
 from schemas.document_schemas import ErrorResponse
 from utils.file_parsers import (
     CorruptFileError,
@@ -67,6 +67,7 @@ if settings.FEATURE_RATE_LIMIT:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=settings.ALLOWED_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
@@ -194,6 +195,7 @@ app.include_router(batch.router)
 app.include_router(exports.router)
 app.include_router(eval_router.router)
 app.include_router(health.router)
+app.include_router(v3_extract.router)
 
 
 if __name__ == "__main__":

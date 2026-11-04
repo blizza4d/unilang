@@ -1,6 +1,5 @@
 import type { ExtendedDocumentResponse } from "./types";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { getApiUrl, getDefaultHeaders } from "@/lib/config";
 
 export interface StoredDocumentSummary {
   id: string;
@@ -15,6 +14,8 @@ export interface StoredDocumentSummary {
   math_verified: boolean;
   total_amount?: number;
   currency?: string;
+  vendor_name?: string;
+  invoice_number?: string;
 }
 
 export interface StoredDocumentDetail extends StoredDocumentSummary {
@@ -41,8 +42,9 @@ export async function fetchDocumentList(
   limit: number = 50,
   offset: number = 0
 ): Promise<StoredDocumentSummary[]> {
-  const res = await fetch(`${BASE_URL}/api/v1/documents?limit=${limit}&offset=${offset}`, {
-    headers: { Accept: "application/json" },
+  const baseUrl = getApiUrl();
+  const res = await fetch(`${baseUrl}/api/v1/documents?limit=${limit}&offset=${offset}`, {
+    headers: getDefaultHeaders(),
   });
   if (!res.ok) {
     throw new Error(`Failed to fetch documents: ${res.statusText}`);
@@ -52,8 +54,9 @@ export async function fetchDocumentList(
 }
 
 export async function fetchDocumentDetail(id: string): Promise<StoredDocumentDetail> {
-  const res = await fetch(`${BASE_URL}/api/v1/documents/${id}`, {
-    headers: { Accept: "application/json" },
+  const baseUrl = getApiUrl();
+  const res = await fetch(`${baseUrl}/api/v1/documents/${id}`, {
+    headers: getDefaultHeaders(),
   });
   if (!res.ok) {
     throw new Error(`Failed to fetch document ${id}: ${res.statusText}`);
@@ -67,11 +70,12 @@ export async function patchDocumentFields(
   userId: string = "operator",
   reason: string = "Manual correction"
 ): Promise<StoredDocumentDetail> {
-  const res = await fetch(`${BASE_URL}/api/v1/documents/${id}`, {
+  const baseUrl = getApiUrl();
+  const res = await fetch(`${baseUrl}/api/v1/documents/${id}`, {
     method: "PATCH",
     headers: {
+      ...getDefaultHeaders(),
       "Content-Type": "application/json",
-      Accept: "application/json",
     },
     body: JSON.stringify({
       user_id: userId,
@@ -90,11 +94,12 @@ export async function approveDocument(
   userId: string = "reviewer",
   notes?: string
 ): Promise<StoredDocumentDetail> {
-  const res = await fetch(`${BASE_URL}/api/v1/documents/${id}/approve`, {
+  const baseUrl = getApiUrl();
+  const res = await fetch(`${baseUrl}/api/v1/documents/${id}/approve`, {
     method: "POST",
     headers: {
+      ...getDefaultHeaders(),
       "Content-Type": "application/json",
-      Accept: "application/json",
     },
     body: JSON.stringify({
       user_id: userId,
@@ -108,8 +113,10 @@ export async function approveDocument(
 }
 
 export async function deleteDocument(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/api/v1/documents/${id}`, {
+  const baseUrl = getApiUrl();
+  const res = await fetch(`${baseUrl}/api/v1/documents/${id}`, {
     method: "DELETE",
+    headers: getDefaultHeaders(),
   });
   if (!res.ok && res.status !== 204) {
     throw new Error(`Failed to delete document: ${res.statusText}`);

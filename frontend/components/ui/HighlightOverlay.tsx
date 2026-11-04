@@ -28,10 +28,10 @@ export function HighlightOverlay({
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
       {pageBoxes.map((box, index) => {
-        let top = box.y * 100;
-        let left = box.x * 100;
-        let height = box.height * 100;
-        let width = box.width * 100;
+        let top = box.y > 1 ? box.y / 10 : box.y * 100;
+        let left = box.x > 1 ? box.x / 10 : box.x * 100;
+        let height = box.height > 1 ? box.height / 10 : box.height * 100;
+        let width = box.width > 1 ? box.width / 10 : box.width * 100;
 
         if (box.box_2d) {
           const [ymin, xmin, ymax, xmax] = box.box_2d;

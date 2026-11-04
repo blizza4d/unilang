@@ -1,3 +1,5 @@
+import { getApiUrl } from "@/lib/config";
+
 export interface SystemCapabilities {
   streaming: boolean;
   grounding: boolean;
@@ -31,7 +33,7 @@ export const DEFAULT_CAPABILITIES: SystemCapabilities = {
 let cachedCapabilities: SystemCapabilities | null = null;
 
 export async function fetchServerCapabilities(
-  baseUrl: string = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+  baseUrl: string = getApiUrl()
 ): Promise<SystemCapabilities> {
   if (cachedCapabilities) {
     return cachedCapabilities;

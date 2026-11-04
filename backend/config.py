@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     VISION_MODEL: str = "gemini-2.5-flash"
     EXTRACTOR_MODEL: str = "gpt-4o"
     JUDGE_MODEL: str = "gpt-4o"
+    CLASSIFIER_MODEL: str = "gemini-2.5-flash"
 
     # Ingestion Constraints
     MAX_UPLOAD_MB: int = 15
@@ -44,12 +45,55 @@ class Settings(BaseSettings):
     MATH_TOLERANCE: float = 0.01
 
     # Network & Logging
-    ALLOWED_ORIGINS: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
-    CORS_ORIGINS: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    ALLOWED_ORIGINS: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "https://uni-lang.vercel.app",
+        ]
+    )
+    CORS_ORIGINS: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "https://uni-lang.vercel.app",
+        ]
+    )
+    ALLOWED_ORIGIN_REGEX: str = r"^https:\/\/.*\.vercel\.app$"
     LOG_LEVEL: str = "INFO"
     JSON_LOGS: bool = True
 
-    # Feature Flags & Extensions
+    # Environment & Database
+    ENVIRONMENT: Literal["development", "staging", "production"] = "development"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./datanova.db"
+    AUTO_MIGRATE: bool = True
+
+    # Storage Backend
+    STORAGE_BACKEND: Literal["local", "s3"] = "local"
+    LOCAL_STORAGE_DIR: str = "./storage_data"
+    S3_ENDPOINT_URL: str = ""
+    S3_BUCKET: str = "datanova-extract"
+    S3_REGION: str = "us-east-1"
+    S3_ACCESS_KEY: str = ""
+    S3_SECRET_KEY: str = ""
+    S3_SSE: bool = False
+
+    # Queue & Worker
+    QUEUE_BACKEND: Literal["inline", "redis"] = "inline"
+    REDIS_URL: str = "redis://localhost:6379/0"
+    WORKER_CONCURRENCY: int = 10
+    JOB_TIMEOUT_SECONDS: int = 300
+    JOB_MAX_TRIES: int = 3
+
+    # Authentication & Security
+    AUTH_MODE: Literal["none", "local", "oidc"] = "none"
+    JWT_SECRET: str = "datanova-enterprise-jwt-signing-secret-key-32chars"
+    JWT_EXPIRATION_MINUTES: int = 1440
+    SECURITY_HEADERS: bool = True
+    TRUSTED_HOSTS: list[str] = Field(default_factory=lambda: ["*"])
+    API_KEY: str = ""
+
+    # Feature Flags & Capabilities
     FEATURE_STREAMING: bool = True
     FEATURE_GROUNDING: bool = True
     FEATURE_PERSISTENCE: bool = True
@@ -59,8 +103,16 @@ class Settings(BaseSettings):
     FEATURE_EVAL: bool = True
     FEATURE_RATE_LIMIT: bool = True
     FEATURE_DEMO_MODE: bool = False
+    FEATURE_OCR_CROSSCHECK: bool = False
+    FEATURE_COMPLIANCE_ENGINE: bool = True
+    FEATURE_FRAUD_DETECTION: bool = True
+    FEATURE_LEARNING: bool = True
+    FEATURE_RECONCILIATION: bool = True
+    FEATURE_WORKFLOWS: bool = True
+    FEATURE_WEBHOOKS: bool = True
+    ALLOW_SENSITIVE_TYPES: bool = True
 
-    DATABASE_URL: str = "sqlite+aiosqlite:///./datanova.db"
+    # Performance & Concurrency Limits
     BATCH_MAX_FILES: int = 20
     MAX_BATCH_FILES: int = 20
     BATCH_CONCURRENCY: int = 3
@@ -71,19 +123,23 @@ class Settings(BaseSettings):
     PRICE_TABLE_JSON: str = '{"gpt-4o": {"input": 2.50, "output": 10.00}, "gemini-2.5-flash": {"input": 0.15, "output": 0.60}}'
     OTEL_ENABLED: bool = False
     OTEL_EXPORTER_OTLP_ENDPOINT: str = ""
-    SECURITY_HEADERS: bool = True
-    TRUSTED_HOSTS: list[str] = Field(default_factory=lambda: ["*"])
-    API_KEY: str = ""
-
 
     @field_validator("ALLOWED_ORIGINS", "CORS_ORIGINS", mode="before")
     @classmethod
     def parse_allowed_origins(cls, value: object) -> list[str]:
         if isinstance(value, str):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
+            parsed = [origin.strip() for origin in value.split(",") if origin.strip()]
+            if parsed:
+                return parsed
         if isinstance(value, list):
-            return [str(origin).strip() for origin in value if str(origin).strip()]
-        return ["http://localhost:3000"]
+            parsed = [str(origin).strip() for origin in value if str(origin).strip()]
+            if parsed:
+                return parsed
+        return [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "https://uni-lang.vercel.app",
+        ]
 
     @field_validator("TRUSTED_HOSTS", mode="before")
     @classmethod
@@ -95,12 +151,41 @@ class Settings(BaseSettings):
         return ["*"]
 
     @model_validator(mode="after")
+    def validate_production_hardening(self) -> "Settings":
+        # In production, enforce non-local storage, relational Postgres, and tight origins
+        if self.ENVIRONMENT == "production":
+            if "sqlite" in self.DATABASE_URL:
+                raise ValueError("Production environment cannot use SQLite; set PostgreSQL DATABASE_URL")
+            if self.STORAGE_BACKEND == "local":
+                raise ValueError("Production environment cannot use local storage; configure S3 / MinIO")
+            if "*" in self.ALLOWED_ORIGINS or "*" in self.CORS_ORIGINS:
+                raise ValueError("Production environment forbids wildcard CORS origins")
+            if not self.API_KEY and self.AUTH_MODE == "none":
+                raise ValueError("Production environment requires API_KEY or AUTH_MODE != 'none'")
+        return self
+
+    @model_validator(mode="after")
     def validate_provider_keys(self) -> "Settings":
+        if self.FEATURE_DEMO_MODE:
+            return self
+
+        has_openai = bool(self.OPENAI_API_KEY and self.OPENAI_API_KEY.strip())
+        has_google = bool(self.GOOGLE_API_KEY and self.GOOGLE_API_KEY.strip())
+
+        if not has_openai and not has_google:
+            if self.ENVIRONMENT != "production":
+                # Graceful degradation in dev/staging to prevent boot crash
+                self.FEATURE_DEMO_MODE = True
+                return self
+            raise ValueError(
+                "Neither OPENAI_API_KEY nor GOOGLE_API_KEY is configured in production. "
+                "Provide API keys or explicitly set FEATURE_DEMO_MODE=true."
+            )
+
         if (
-            self.FEATURE_DEMO_MODE
-            or "pytest" in sys.modules
+            os.getenv("DATANOVA_SKIP_KEY_VALIDATION", "false").lower() == "true"
             or os.getenv("PYTEST_CURRENT_TEST")
-            or os.getenv("DATANOVA_SKIP_KEY_VALIDATION", "false").lower() == "true"
+            or "pytest" in sys.modules
         ):
             return self
 
@@ -111,11 +196,17 @@ class Settings(BaseSettings):
         }
 
         for role, provider in provider_map.items():
-            if provider == "openai" and not self.OPENAI_API_KEY:
+            if provider == "openai" and not has_openai:
+                if self.ENVIRONMENT != "production":
+                    self.FEATURE_DEMO_MODE = True
+                    return self
                 raise ValueError(
                     f"Provider '{provider}' configured for role '{role}', but OPENAI_API_KEY is not set."
                 )
-            if provider == "google" and not self.GOOGLE_API_KEY:
+            if provider == "google" and not has_google:
+                if self.ENVIRONMENT != "production":
+                    self.FEATURE_DEMO_MODE = True
+                    return self
                 raise ValueError(
                     f"Provider '{provider}' configured for role '{role}', but GOOGLE_API_KEY is not set."
                 )

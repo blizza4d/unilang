@@ -13,6 +13,7 @@ import {
   Clock,
   Globe2,
 } from "lucide-react";
+import { getApiUrl, getDefaultHeaders } from "@/lib/config";
 
 interface EvalReport {
   timestamp: string;
@@ -49,8 +50,10 @@ export function ScoreboardModal({
     setIsLoading(true);
     setError(null);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const res = await fetch(`${baseUrl}/api/v1/eval/latest`);
+      const baseUrl = getApiUrl();
+      const res = await fetch(`${baseUrl}/api/v1/eval/latest`, {
+        headers: getDefaultHeaders(),
+      });
       if (!res.ok) {
         throw new Error(`Failed to load scoreboard: ${res.statusText}`);
       }

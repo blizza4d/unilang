@@ -4,6 +4,7 @@ import {
   StageStatus,
 } from "@/lib/types";
 import { ApiError } from "@/lib/api";
+import { getApiUrl, getDefaultHeaders } from "@/lib/config";
 
 export interface PipelineEventPayload {
   event_id: string;
@@ -43,16 +44,14 @@ export async function streamExtract(
   handlers: StreamHandlers,
   signal?: AbortSignal
 ): Promise<void> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  const apiUrl = getApiUrl();
   const formData = new FormData();
   formData.append("file", file);
 
   const headers: Record<string, string> = {
+    ...getDefaultHeaders(),
     Accept: "text/event-stream",
   };
-  if (process.env.NEXT_PUBLIC_API_KEY) {
-    headers["X-API-Key"] = process.env.NEXT_PUBLIC_API_KEY;
-  }
 
   let response: Response;
   try {
@@ -135,6 +134,9 @@ export async function streamExtract(
     }
   } catch (err: unknown) {
     if (err instanceof DOMException && err.name === "AbortError") {
+      throw err;
+    }
+    if (err instanceof ApiError) {
       throw err;
     }
     throw new ApiError(

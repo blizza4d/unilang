@@ -56,6 +56,10 @@ def test_oversized_file_upload(client):
 
 
 def test_extract_happy_path_mocked(client, monkeypatch):
+    from config import get_settings
+    settings = get_settings()
+    monkeypatch.setattr(settings, "FEATURE_DEMO_MODE", False)
+
     mock_response = FinalDocumentResponse(
         extracted_data=ExtractedInvoice(
             vendor_name="Test Enterprise",

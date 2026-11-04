@@ -29,20 +29,20 @@ def _build_streaming_response(
 ) -> Response:
     media_types = {
         "json": "application/json",
-        "csv": "text/csv; charset=utf-8",
+        "csv": "application/zip",
         "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "pdf": "application/pdf",
     }
     extensions = {
         "json": "json",
-        "csv": "csv",
+        "csv": "zip",
         "xlsx": "xlsx",
         "pdf": "pdf",
     }
 
     media_type = media_types[export_format]
     ext = extensions[export_format]
-    filename = f"{filename_base}.{ext}"
+    filename = f"{filename_base}_csv.zip" if export_format == "csv" else f"{filename_base}.{ext}"
 
     return StreamingResponse(
         io.BytesIO(data_bytes),

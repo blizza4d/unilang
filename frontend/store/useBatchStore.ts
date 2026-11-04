@@ -1,6 +1,5 @@
 import { create } from "zustand";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { getApiUrl, getDefaultHeaders } from "@/lib/config";
 
 export interface BatchItem {
   id: string;
@@ -33,6 +32,7 @@ interface BatchState {
   items: BatchItem[];
   summary: BatchSummary | null;
   error: string | null;
+  activeEventSource: EventSource | null;
 
   setIsOpen: (isOpen: boolean) => void;
   startBatch: (files: File[]) => Promise<void>;
@@ -47,10 +47,15 @@ export const useBatchStore = create<BatchState>((set, get) => ({
   items: [],
   summary: null,
   error: null,
+  activeEventSource: null,
 
   setIsOpen: (isOpen: boolean) => set({ isOpen }),
 
   resetBatch: () => {
+    const { activeEventSource } = get();
+    if (activeEventSource) {
+      activeEventSource.close();
+    }
     set({
       batchId: null,
       status: "idle",
@@ -58,17 +63,26 @@ export const useBatchStore = create<BatchState>((set, get) => ({
       summary: null,
       error: null,
       isOpen: false,
+      activeEventSource: null,
     });
   },
 
   startBatch: async (files: File[]) => {
     if (!files.length) return;
 
+    const { activeEventSource } = get();
+    if (activeEventSource) {
+      activeEventSource.close();
+    }
+
+    const baseUrl = getApiUrl();
+
     set({
       isOpen: true,
       status: "uploading",
       error: null,
       summary: null,
+      activeEventSource: null,
       items: files.map((f, i) => ({
         id: `temp-${i}`,
         filename: f.name,
@@ -80,8 +94,9 @@ export const useBatchStore = create<BatchState>((set, get) => ({
       const formData = new FormData();
       files.forEach((f) => formData.append("files", f));
 
-      const res = await fetch(`${BASE_URL}/api/v1/batch`, {
+      const res = await fetch(`${baseUrl}/api/v1/batch`, {
         method: "POST",
+        headers: getDefaultHeaders(),
         body: formData,
       });
 
@@ -94,7 +109,8 @@ export const useBatchStore = create<BatchState>((set, get) => ({
       set({ batchId, status: "processing" });
 
       // Connect SSE stream for batch progress
-      const eventSource = new EventSource(`${BASE_URL}/api/v1/batch/${batchId}/events`);
+      const eventSource = new EventSource(`${baseUrl}/api/v1/batch/${batchId}/events`);
+      set({ activeEventSource: eventSource });
 
       eventSource.onmessage = (event) => {
         try {
@@ -129,10 +145,12 @@ export const useBatchStore = create<BatchState>((set, get) => ({
               ),
             }));
           } else if (payload.type === "batch_complete") {
-            set({ status: "completed" });
+            set({ status: "completed", activeEventSource: null });
             eventSource.close();
             // Fetch final summary
-            fetch(`${BASE_URL}/api/v1/batch/${batchId}/summary`)
+            fetch(`${baseUrl}/api/v1/batch/${batchId}/summary`, {
+              headers: getDefaultHeaders(),
+            })
               .then((r) => r.json())
               .then((sum) => set({ summary: sum }))
               .catch(console.error);
@@ -144,6 +162,7 @@ export const useBatchStore = create<BatchState>((set, get) => ({
 
       eventSource.onerror = () => {
         eventSource.close();
+        set({ activeEventSource: null });
       };
     } catch (err) {
       set({
@@ -154,12 +173,18 @@ export const useBatchStore = create<BatchState>((set, get) => ({
   },
 
   cancelBatch: async () => {
-    const { batchId } = get();
+    const { batchId, activeEventSource } = get();
+    if (activeEventSource) {
+      activeEventSource.close();
+      set({ activeEventSource: null });
+    }
     if (!batchId) return;
 
+    const baseUrl = getApiUrl();
     try {
-      await fetch(`${BASE_URL}/api/v1/batch/${batchId}/cancel`, {
+      await fetch(`${baseUrl}/api/v1/batch/${batchId}/cancel`, {
         method: "POST",
+        headers: getDefaultHeaders(),
       });
       set({ status: "cancelled" });
     } catch (err) {

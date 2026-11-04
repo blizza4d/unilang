@@ -19,6 +19,11 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ""
       icon: CheckCircle2,
       label: "Approved",
     },
+    AUTOMATED_PASS: {
+      bg: "bg-accent-green/15 border-accent-green/30 text-accent-green",
+      icon: CheckCircle2,
+      label: "Automated Pass",
+    },
     REQUIRES_HUMAN_REVIEW: {
       bg: "bg-accent-amber/15 border-accent-amber/30 text-accent-amber",
       icon: AlertTriangle,

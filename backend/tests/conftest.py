@@ -16,7 +16,7 @@ from db.session import get_db, init_db
 from main import app
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(autouse=True)
 async def initialize_test_database():
     await init_db()
 

@@ -5,8 +5,10 @@ import { streamExtract } from "@/lib/stream";
 import {
   ActivePipelineStage,
   BoundingBox,
+  DocType,
   EditableValue,
   ExtendedDocumentResponse,
+  GenericDocumentResponse,
   LineItem,
   OverallStatus,
   PipelineStage,
@@ -21,11 +23,12 @@ export interface ApiErrorState {
 }
 
 const INITIAL_STAGES: Record<ActivePipelineStage, StageState> = {
-
   prepare: { status: "idle", durationMs: null, message: "Preparing document" },
   vision: { status: "idle", durationMs: null, message: "Spatial transcription" },
+  classifier: { status: "idle", durationMs: null, message: "Document classification" },
   extractor: { status: "idle", durationMs: null, message: "Multilingual structuring" },
   grounding: { status: "idle", durationMs: null, message: "Bounding box localization" },
+  compliance: { status: "idle", durationMs: null, message: "Compliance validation" },
   judge: { status: "idle", durationMs: null, message: "Deterministic math & judge QA" },
   finalize: { status: "idle", durationMs: null, message: "Finalizing response" },
 };
@@ -35,6 +38,8 @@ export interface DocumentStateValues {
   filePreviewUrl: string | null;
   isProcessing: boolean;
   extractedData: ExtendedDocumentResponse | null;
+  genericData: GenericDocumentResponse | null;
+  detectedDocType: DocType;
   isReviewMode: boolean;
   error: ApiErrorState | null;
   resolvedFields: Record<string, boolean>;
@@ -53,8 +58,10 @@ export interface DocumentStoreActions {
   resetStore: () => void;
   toggleReviewMode: () => void;
   setReviewMode: (value: boolean) => void;
+  setDocType: (type: DocType) => void;
   processFile: () => Promise<void>;
   updateFieldValue: (field: ScalarFieldName, value: EditableValue) => void;
+  updateValueAtPath: (path: string, value: unknown) => void;
   updateLineItemValue: (
     index: number,
     prop: keyof LineItem,
@@ -64,9 +71,9 @@ export interface DocumentStoreActions {
   setActiveField: (key: string | null) => void;
   setActivePage: (page: number) => void;
   setExtractedData: (data: ExtendedDocumentResponse) => void;
+  setGenericData: (data: GenericDocumentResponse) => void;
   setBoundingBoxes: (boxes: BoundingBox[]) => void;
 }
-
 
 export type DocumentStore = DocumentStateValues & DocumentStoreActions;
 
@@ -75,6 +82,8 @@ const initialState: DocumentStateValues = {
   filePreviewUrl: null,
   isProcessing: false,
   extractedData: null,
+  genericData: null,
+  detectedDocType: "invoice",
   isReviewMode: false,
   error: null,
   resolvedFields: {},
@@ -87,7 +96,6 @@ const initialState: DocumentStateValues = {
   activePage: 1,
   boundingBoxes: [],
 };
-
 
 function checkAndDeriveStatus(
   currentData: ExtendedDocumentResponse,
@@ -145,6 +153,8 @@ export const useDocumentStore = create<DocumentStore>()(
           file: newFile,
           filePreviewUrl: newUrl,
           extractedData: null,
+          genericData: null,
+          detectedDocType: "invoice",
           isReviewMode: false,
           error: null,
           resolvedFields: {},
@@ -174,6 +184,10 @@ export const useDocumentStore = create<DocumentStore>()(
 
       setReviewMode: (value: boolean) => {
         set({ isReviewMode: value });
+      },
+
+      setDocType: (type: DocType) => {
+        set({ detectedDocType: type });
       },
 
       setActiveField: (key: string | null) => {
@@ -207,6 +221,13 @@ export const useDocumentStore = create<DocumentStore>()(
         });
       },
 
+      setGenericData: (data: GenericDocumentResponse) => {
+        set({
+          genericData: data,
+          detectedDocType: data.doc_type,
+          isReviewMode: data.overall_status === "REQUIRES_HUMAN_REVIEW",
+        });
+      },
 
       processFile: async () => {
         const { file, isProcessing, runId } = get();
@@ -224,123 +245,82 @@ export const useDocumentStore = create<DocumentStore>()(
           currentStage: "prepare",
         });
 
-        const useStreaming = true; // Streaming enabled by default in Phase 2
-
-        if (useStreaming) {
-          try {
-            await streamExtract(
-              file,
-              {
-                onStage: (event) => {
-                  if (get().runId !== currentRunId) return;
-                  set((state) => ({
-                    currentStage: event.stage,
-                    pipelineStages: {
-                      ...state.pipelineStages,
-                      [event.stage]: {
-                        status: event.status,
-                        durationMs: event.duration_ms,
-                        message: event.message,
-                      },
-                    },
-                  }));
-                },
-                onResult: (event) => {
-                  if (get().runId !== currentRunId) return;
-                  set({
-                    extractedData: event.result,
-                    isReviewMode: event.result.overall_status === "REQUIRES_HUMAN_REVIEW",
-                    resolvedFields: {},
-                    currentStage: "finalize",
-                  });
-                },
-                onError: (event) => {
-                  if (get().runId !== currentRunId) return;
-                  set({
-                    error: {
+        try {
+          await streamExtract(
+            file,
+            {
+              onStage: (event) => {
+                if (get().runId !== currentRunId) return;
+                set((state) => ({
+                  currentStage: event.stage,
+                  pipelineStages: {
+                    ...state.pipelineStages,
+                    [event.stage as ActivePipelineStage]: {
+                      status: event.status,
+                      durationMs: event.duration_ms,
                       message: event.message,
-                      code: event.error_code,
-                      status: 500,
                     },
-                  });
-                },
-              },
-              controller.signal
-            );
-          } catch (err: unknown) {
-            if (get().runId !== currentRunId) return;
-            if (err instanceof DOMException && err.name === "AbortError") return;
-
-            // Fallback to Phase 1 non-streaming endpoint on streaming error
-            try {
-              const res = await extractDocument(file, controller.signal);
-              if (get().runId === currentRunId) {
-                set({
-                  extractedData: res as ExtendedDocumentResponse,
-                  isReviewMode: res.overall_status === "REQUIRES_HUMAN_REVIEW",
-                  resolvedFields: {},
-                });
-              }
-            } catch (fallbackErr: unknown) {
-              if (fallbackErr instanceof ApiError) {
-                set({
-                  error: {
-                    message: fallbackErr.message,
-                    code: fallbackErr.code,
-                    status: fallbackErr.status,
                   },
+                }));
+              },
+              onResult: (event) => {
+                if (get().runId !== currentRunId) return;
+                set({
+                  extractedData: event.result,
+                  isReviewMode: event.result.overall_status === "REQUIRES_HUMAN_REVIEW",
+                  resolvedFields: {},
+                  currentStage: "finalize",
                 });
-              } else {
+              },
+              onError: (event) => {
+                if (get().runId !== currentRunId) return;
                 set({
                   error: {
-                    message: "Extraction failed.",
-                    code: "EXTRACTION_ERROR",
+                    message: event.message,
+                    code: event.error_code,
                     status: 500,
                   },
                 });
-              }
-            }
-          } finally {
-            if (get().runId === currentRunId) {
-              set({ isProcessing: false, abortController: null });
-            }
-          }
-        } else {
-          // Standard Phase 1 endpoint
+              },
+            },
+            controller.signal
+          );
+        } catch (err: unknown) {
+          if (get().runId !== currentRunId) return;
+          if (err instanceof DOMException && err.name === "AbortError") return;
+
+          // Fallback to Phase 1 non-streaming endpoint
           try {
-            const response = await extractDocument(file, controller.signal);
+            const res = await extractDocument(file, controller.signal);
             if (get().runId === currentRunId) {
               set({
-                extractedData: response as ExtendedDocumentResponse,
-                isReviewMode: response.overall_status === "REQUIRES_HUMAN_REVIEW",
+                extractedData: res as ExtendedDocumentResponse,
+                isReviewMode: res.overall_status === "REQUIRES_HUMAN_REVIEW",
                 resolvedFields: {},
               });
             }
-          } catch (err: unknown) {
-            if (get().runId !== currentRunId) return;
-            if (err instanceof DOMException && err.name === "AbortError") return;
-
-            if (err instanceof ApiError) {
+          } catch (fallbackErr: unknown) {
+            if (fallbackErr instanceof ApiError) {
               set({
                 error: {
-                  message: err.message,
-                  code: err.code,
-                  status: err.status,
+                  message: fallbackErr.message,
+                  code: fallbackErr.code,
+                  status: fallbackErr.status,
                 },
               });
             } else {
               set({
                 error: {
                   message: "Extraction failed.",
-                  code: "UNKNOWN_ERROR",
+                  code: "EXTRACTION_ERROR",
                   status: 500,
                 },
               });
             }
-          } finally {
-            if (get().runId === currentRunId) {
-              set({ isProcessing: false, abortController: null });
-            }
+          }
+        } finally {
+          if (get().runId === currentRunId) {
+            set({ isProcessing: false, abortController: null });
           }
         }
       },
@@ -375,6 +355,56 @@ export const useDocumentStore = create<DocumentStore>()(
           extractedData: {
             ...extractedData,
             extracted_data: updatedInvoice,
+            overall_status: newStatus,
+          },
+          resolvedFields: updatedResolved,
+        });
+      },
+
+      updateValueAtPath: (path: string, value: unknown) => {
+        // Prototype pollution shield
+        const segments = path.split(".");
+        for (const seg of segments) {
+          if (seg === "__proto__" || seg === "constructor" || seg === "prototype") {
+            console.error(`Prototype pollution attempt blocked on path: ${path}`);
+            return;
+          }
+        }
+
+        const { extractedData, resolvedFields } = get();
+        if (!extractedData) return;
+
+        // Immutable path update
+        const clonedData = JSON.parse(JSON.stringify(extractedData.extracted_data)) as Record<string, unknown>;
+        let curr: Record<string, unknown> = clonedData;
+        for (let i = 0; i < segments.length - 1; i++) {
+          const seg = segments[i];
+          if (!seg) continue;
+          if (curr[seg] === undefined || curr[seg] === null) {
+            const nextSeg = segments[i + 1] || "";
+            curr[seg] = /^\d+$/.test(nextSeg) ? [] : {};
+          }
+          curr = curr[seg] as Record<string, unknown>;
+        }
+        const leaf = segments[segments.length - 1];
+        if (leaf) {
+          curr[leaf] = value;
+        }
+
+        const updatedResolved = {
+          ...resolvedFields,
+          [path]: true,
+        };
+
+        const newStatus = checkAndDeriveStatus(
+          { ...extractedData, extracted_data: clonedData as unknown as typeof extractedData.extracted_data },
+          updatedResolved
+        );
+
+        set({
+          extractedData: {
+            ...extractedData,
+            extracted_data: clonedData as unknown as typeof extractedData.extracted_data,
             overall_status: newStatus,
           },
           resolvedFields: updatedResolved,

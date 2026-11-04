@@ -19,7 +19,7 @@ export type InvoiceFieldName = keyof ExtractedInvoice;
 
 export type ScalarFieldName = Exclude<InvoiceFieldName, "line_items">;
 
-export type OverallStatus = "APPROVED" | "REQUIRES_HUMAN_REVIEW" | "FAILED";
+export type OverallStatus = "APPROVED" | "REQUIRES_HUMAN_REVIEW" | "FAILED" | "AUTOMATED_PASS";
 
 export interface ValidationScore {
   field_name: InvoiceFieldName;
@@ -46,7 +46,6 @@ export interface BoundingBox {
   confidence?: number;
   box_2d?: [number, number, number, number];
 }
-
 
 export interface FieldGrounding {
   field_name: string;
@@ -113,8 +112,10 @@ export const SCALAR_FIELDS: readonly ScalarFieldConfig[] = [
 export type ActivePipelineStage =
   | "prepare"
   | "vision"
+  | "classifier"
   | "extractor"
   | "grounding"
+  | "compliance"
   | "judge"
   | "finalize";
 
@@ -123,8 +124,6 @@ export type PipelineStage =
   | ActivePipelineStage
   | "complete"
   | "error";
-
-
 
 export type StageStatus = "idle" | "started" | "completed" | "failed";
 
@@ -140,4 +139,101 @@ export function isExtendedResponse(
   if (typeof data !== "object" || data === null) return false;
   const rec = data as Record<string, unknown>;
   return "extracted_data" in rec && "validation_metrics" in rec;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 3 Multi-Document & Platform Extensions
+// ---------------------------------------------------------------------------
+
+export type DocType =
+  | "invoice"
+  | "receipt"
+  | "purchase_order"
+  | "credit_note"
+  | "bank_statement"
+  | "utility_bill"
+  | "delivery_note"
+  | "expense_report"
+  | "id_document"
+  | "contract_summary"
+  | "unknown";
+
+export interface PageRange {
+  doc_type: string;
+  start_page: number;
+  end_page: number;
+}
+
+export interface DocumentClassification {
+  doc_type: DocType;
+  confidence: number;
+  language: string;
+  script: string;
+  is_multi_document: boolean;
+  page_ranges: PageRange[];
+  reasoning: string;
+}
+
+export interface GenericValidationScore {
+  field_name: string;
+  confidence_score: number;
+  needs_review: boolean;
+  reasoning: string;
+}
+
+export interface ComplianceViolation {
+  rule_id: string;
+  field_path: string;
+  severity: "error" | "warning";
+  message: string;
+}
+
+export interface ComplianceReport {
+  status: "passed" | "failed" | "warning";
+  checks: number;
+  violations?: ComplianceViolation[];
+}
+
+export interface FraudReport {
+  risk_score: number;
+  tampering_detected: boolean;
+  is_duplicate: boolean;
+  signals?: string[];
+}
+
+export interface GenericDocumentResponse {
+  document_id: string;
+  tenant_id: string;
+  filename: string;
+  doc_type: DocType;
+  schema_version: number;
+  classification: DocumentClassification;
+  data: Record<string, unknown>;
+  validation_metrics: GenericValidationScore[];
+  compliance?: ComplianceReport | null;
+  fraud?: FraudReport | null;
+  grounding: Record<string, unknown>;
+  overall_status: OverallStatus;
+  usage?: Record<string, unknown>;
+}
+
+export interface SchemaSectionLayout {
+  title: string;
+  fields?: string[];
+  table?: string;
+  columns?: string[];
+}
+
+export interface DocTypeLayout {
+  sections: SchemaSectionLayout[];
+}
+
+export interface DocTypeMetadata {
+  doc_type: DocType;
+  title: string;
+  version: number;
+  field_names: string[];
+  validators: string[];
+  ui_layout: DocTypeLayout;
+  sensitive: boolean;
 }

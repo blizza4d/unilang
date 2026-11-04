@@ -1,3 +1,5 @@
+import { getApiUrl, getDefaultHeaders } from "@/lib/config";
+
 export function triggerFileDownload(blob: Blob, filename: string): void {
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -14,7 +16,7 @@ export async function downloadExport(
   format: "json" | "csv" | "xlsx" | "pdf",
   filename: string = "invoice"
 ): Promise<void> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const baseUrl = getApiUrl();
   const baseName = filename.replace(/\.[^/.]+$/, "");
 
   const response = await fetch(
@@ -24,6 +26,7 @@ export async function downloadExport(
     {
       method: "POST",
       headers: {
+        ...getDefaultHeaders(),
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
@@ -35,6 +38,7 @@ export async function downloadExport(
   }
 
   const blob = await response.blob();
-  const ext = format === "json" ? "json" : format === "csv" ? "csv" : format === "xlsx" ? "xlsx" : "pdf";
-  triggerFileDownload(blob, `${baseName}.${ext}`);
+  const ext = format === "json" ? "json" : format === "csv" ? "zip" : format === "xlsx" ? "xlsx" : "pdf";
+  const downloadName = format === "csv" ? `${baseName}_csv.zip` : `${baseName}.${ext}`;
+  triggerFileDownload(blob, downloadName);
 }

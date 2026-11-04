@@ -17,6 +17,7 @@ import { ScoreboardModal } from "@/components/layout/ScoreboardModal";
 import { CommandPalette } from "@/components/ui/CommandPalette";
 import { GuidedTour } from "@/components/ui/GuidedTour";
 import { ToastHost } from "@/components/ui/ToastHost";
+import { BackendStatusBanner } from "@/components/ui/BackendStatusBanner";
 import { useDocumentStore } from "@/store/useDocumentStore";
 import { useHistoryStore } from "@/store/useHistoryStore";
 import { useBatchStore } from "@/store/useBatchStore";
@@ -151,6 +152,9 @@ export default function HomePage() {
           </button>
         </div>
       </header>
+
+      {/* Backend Connectivity / Mixed-Content Alert Banner */}
+      <BackendStatusBanner />
 
       {/* 50/50 Split Workspace Area */}
       <div className="flex-1 overflow-hidden relative">

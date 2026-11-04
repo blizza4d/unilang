@@ -1,0 +1,39 @@
+# Render Infrastructure Blueprint for DataNova Extract Backend
+services:
+  - type: web
+    name: datanova-backend
+    runtime: python
+    region: oregon
+    plan: standard
+    rootDir: backend
+    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT --workers 2"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENVIRONMENT
+        value: staging
+      - key: ALLOWED_ORIGINS
+        value: "http://localhost:3000,https://uni-lang.vercel.app"
+      - key: ALLOWED_ORIGIN_REGEX
+        value: "^https:\\/\\/.*\\.vercel\\.app$"
+      - key: DATABASE_URL
+        value: "sqlite+aiosqlite:///./datanova.db"
+      - key: STORAGE_BACKEND
+        value: "local"
+      - key: LOCAL_STORAGE_DIR
+        value: "./storage_data"
+      - key: FEATURE_STREAMING
+        value: "true"
+      - key: FEATURE_PERSISTENCE
+        value: "true"
+      - key: FEATURE_BATCH
+        value: "true"
+      - key: FEATURE_EXPORTS
+        value: "true"
+      - key: FEATURE_DEMO_MODE
+        value: "true"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
