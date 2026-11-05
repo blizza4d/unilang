@@ -1,7 +1,16 @@
 import asyncio
 from contextlib import asynccontextmanager
 import logging
+import os
+from pathlib import Path
+import sys
 from typing import AsyncGenerator
+
+# Ensure backend directory is on sys.path regardless of execution working directory
+_backend_dir = str(Path(__file__).resolve().parent)
+if _backend_dir not in sys.path:
+    sys.path.insert(0, _backend_dir)
+
 from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
