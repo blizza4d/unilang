@@ -13,18 +13,18 @@ export interface BackendConnectionStatus {
   isHttps: boolean;
 }
 
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "development"
+    ? "http://localhost:8000"
+    : "https://backend-tau-livid-81.vercel.app");
+
 /**
  * Resolves the active backend API base URL with strict normalization.
  * Strips trailing slashes to prevent malformed double-slash route requests.
  */
 export function getApiUrl(): string {
-  const envUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (envUrl && envUrl.trim().length > 0) {
-    return envUrl.trim().replace(/\/+$/, "");
-  }
-
-  // Fallback for local development
-  return "http://localhost:8000";
+  return API_BASE_URL.replace(/\/+$/, "");
 }
 
 /**

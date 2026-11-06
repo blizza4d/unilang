@@ -12,13 +12,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config import get_settings
 from db.models import Base
-from db.session import get_db, init_db
+from db.session import engine, get_db, init_db
 from main import app
 
 
 @pytest_asyncio.fixture(autouse=True)
 async def initialize_test_database():
     await init_db()
+    async with engine.begin() as conn:
+        for table in reversed(Base.metadata.sorted_tables):
+            await conn.execute(table.delete())
 
 
 @pytest_asyncio.fixture

@@ -1,5 +1,11 @@
 import { ApiErrorBody, FinalDocumentResponse, OverallStatus } from "@/lib/types";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "development"
+    ? "http://localhost:8000"
+    : "https://backend-tau-livid-81.vercel.app");
+
 const ERROR_MESSAGE_MAP: Record<string, string> = {
   EMPTY_FILE: "That file is empty.",
   CORRUPT_FILE: "We couldn't read that file. Try another copy.",
@@ -74,10 +80,7 @@ export async function extractDocument(
   file: File,
   signal?: AbortSignal
 ): Promise<FinalDocumentResponse> {
-  const baseUrl = (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.trim().length > 0)
-    ? process.env.NEXT_PUBLIC_API_URL.trim().replace(/\/+$/, "")
-    : "http://localhost:8000";
-
+  const baseUrl = API_BASE_URL.replace(/\/+$/, "");
   const endpoint = `${baseUrl}/api/v1/extract`;
   const formData = new FormData();
   formData.append("file", file);
@@ -99,7 +102,7 @@ export async function extractDocument(
     throw new ApiError(
       0,
       "NETWORK_ERROR",
-      `Cannot reach the extraction server at ${baseUrl}. Ensure FastAPI is running on port 8000 with CORS enabled.`
+      `Cannot reach the extraction server at ${baseUrl}. Ensure backend is running and accessible.`
     );
   }
 

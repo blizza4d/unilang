@@ -16,12 +16,12 @@ from services.demo_pipeline import run_demo_pipeline
 from utils.file_parsers import detect_mime, validate_size
 
 router = APIRouter(prefix="/api/v1", tags=["Extraction"])
-settings = get_settings()
 
 
 @router.get("/capabilities")
 async def get_capabilities() -> dict[str, object]:
     """Exposes supported feature flags and active model providers."""
+    settings = get_settings()
     return {
         "server_version": "2.0.0",
         "version": "2.0.0",
@@ -66,6 +66,7 @@ async def extract_invoice_v1(
     session: AsyncSession = Depends(get_session),
 ) -> FinalDocumentResponse:
     """Phase 1 backwards-compatible extraction endpoint."""
+    settings = get_settings()
     try:
         file_bytes = await file.read()
     finally:
@@ -121,6 +122,7 @@ async def extract_invoice_v2(
     session: AsyncSession = Depends(get_session),
 ) -> ExtendedDocumentResponse:
     """Phase 2 extended extraction endpoint with spatial grounding & usage."""
+    settings = get_settings()
     try:
         file_bytes = await file.read()
     finally:
@@ -169,6 +171,7 @@ async def extract_invoice_stream(
     file: UploadFile = File(...),
 ) -> StreamingResponse:
     """Live Server-Sent Events stream delivering real-time per-agent status."""
+    settings = get_settings()
     try:
         file_bytes = await file.read()
     finally:

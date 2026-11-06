@@ -50,6 +50,7 @@ class Settings(BaseSettings):
             "http://localhost:3000",
             "http://127.0.0.1:3000",
             "https://uni-lang.vercel.app",
+            "https://backend-tau-livid-81.vercel.app",
         ]
     )
     CORS_ORIGINS: list[str] = Field(
@@ -57,6 +58,7 @@ class Settings(BaseSettings):
             "http://localhost:3000",
             "http://127.0.0.1:3000",
             "https://uni-lang.vercel.app",
+            "https://backend-tau-livid-81.vercel.app",
         ]
     )
     ALLOWED_ORIGIN_REGEX: str = r"^https:\/\/.*\.vercel\.app$"
@@ -139,6 +141,7 @@ class Settings(BaseSettings):
             "http://localhost:3000",
             "http://127.0.0.1:3000",
             "https://uni-lang.vercel.app",
+            "https://backend-tau-livid-81.vercel.app",
         ]
 
     @field_validator("TRUSTED_HOSTS", mode="before")

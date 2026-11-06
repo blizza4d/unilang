@@ -79,6 +79,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://uni-lang.vercel.app",
+        "https://backend-tau-livid-81.vercel.app",
     ],
     allow_origin_regex=settings.ALLOWED_ORIGIN_REGEX,
     allow_credentials=True,

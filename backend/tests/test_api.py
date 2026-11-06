@@ -87,11 +87,12 @@ def test_extract_happy_path_mocked(client, monkeypatch):
     async def mock_aprocess_document(file_bytes: bytes) -> FinalDocumentResponse:
         return mock_response
 
+    monkeypatch.setattr("routers.extract.aprocess_document", mock_aprocess_document)
     monkeypatch.setattr("main.aprocess_document", mock_aprocess_document)
 
     response = client.post(
         "/api/v1/extract",
-        files={"file": ("invoice.pdf", b"%PDF-mock-bytes", "application/pdf")},
+        files={"file": ("invoice.pdf", b"%PDF-mock-bytes-unique-happy", "application/pdf")},
     )
     assert response.status_code == 200
     data = response.json()

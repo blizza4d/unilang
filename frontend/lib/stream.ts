@@ -5,6 +5,12 @@ import {
 } from "@/lib/types";
 import { ApiError } from "@/lib/api";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "development"
+    ? "http://localhost:8000"
+    : "https://backend-tau-livid-81.vercel.app");
+
 export interface PipelineEventPayload {
   event_id: string;
   request_id: string;
@@ -43,10 +49,7 @@ export async function streamExtract(
   handlers: StreamHandlers,
   signal?: AbortSignal
 ): Promise<void> {
-  const baseUrl = (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.trim().length > 0)
-    ? process.env.NEXT_PUBLIC_API_URL.trim().replace(/\/+$/, "")
-    : "http://localhost:8000";
-
+  const baseUrl = API_BASE_URL.replace(/\/+$/, "");
   const endpoint = `${baseUrl}/api/v1/extract/stream`;
   const formData = new FormData();
   formData.append("file", file);
@@ -76,7 +79,7 @@ export async function streamExtract(
     throw new ApiError(
       0,
       "NETWORK_ERROR",
-      `Cannot reach the extraction server at ${baseUrl}. Ensure FastAPI is running on port 8000.`
+      `Cannot reach the extraction server at ${baseUrl}. Ensure backend is running and accessible.`
     );
   }
 
