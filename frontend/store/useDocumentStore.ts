@@ -246,6 +246,7 @@ export const useDocumentStore = create<DocumentStore>()(
         });
 
         try {
+          console.log(`[useDocumentStore] Processing file "${file.name}" via streamExtract...`);
           await streamExtract(
             file,
             {
@@ -289,6 +290,8 @@ export const useDocumentStore = create<DocumentStore>()(
           if (get().runId !== currentRunId) return;
           if (err instanceof DOMException && err.name === "AbortError") return;
 
+          console.warn("[useDocumentStore] Streaming failed or was interrupted, falling back to extractDocument:", err);
+
           // Fallback to Phase 1 non-streaming endpoint
           try {
             const res = await extractDocument(file, controller.signal);
@@ -297,9 +300,11 @@ export const useDocumentStore = create<DocumentStore>()(
                 extractedData: res as ExtendedDocumentResponse,
                 isReviewMode: res.overall_status === "REQUIRES_HUMAN_REVIEW",
                 resolvedFields: {},
+                currentStage: "finalize",
               });
             }
           } catch (fallbackErr: unknown) {
+            console.error("[useDocumentStore] Unary fallback extraction failed:", fallbackErr);
             if (fallbackErr instanceof ApiError) {
               set({
                 error: {

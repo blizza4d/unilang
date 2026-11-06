@@ -4,7 +4,6 @@ import {
   StageStatus,
 } from "@/lib/types";
 import { ApiError } from "@/lib/api";
-import { getApiUrl, getDefaultHeaders } from "@/lib/config";
 
 export interface PipelineEventPayload {
   event_id: string;
@@ -44,28 +43,41 @@ export async function streamExtract(
   handlers: StreamHandlers,
   signal?: AbortSignal
 ): Promise<void> {
-  const apiUrl = getApiUrl();
+  const baseUrl = (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.trim().length > 0)
+    ? process.env.NEXT_PUBLIC_API_URL.trim().replace(/\/+$/, "")
+    : "http://localhost:8000";
+
+  const endpoint = `${baseUrl}/api/v1/extract/stream`;
   const formData = new FormData();
   formData.append("file", file);
 
   const headers: Record<string, string> = {
-    ...getDefaultHeaders(),
     Accept: "text/event-stream",
   };
+  if (process.env.NEXT_PUBLIC_API_KEY) {
+    headers["X-API-Key"] = process.env.NEXT_PUBLIC_API_KEY;
+  }
+
+  console.log(`[Stream API] Initiating stream extract for "${file.name}" to ${endpoint}`);
 
   let response: Response;
   try {
-    response = await fetch(`${apiUrl}/api/v1/extract/stream`, {
+    response = await fetch(endpoint, {
       method: "POST",
       body: formData,
       headers,
       signal,
     });
   } catch (err: unknown) {
+    console.error(`[Stream API Error] Network error during stream fetch from ${endpoint}:`, err);
     if (err instanceof DOMException && err.name === "AbortError") {
       throw err;
     }
-    throw new ApiError(0, "NETWORK_ERROR", "Cannot reach the extraction server.");
+    throw new ApiError(
+      0,
+      "NETWORK_ERROR",
+      `Cannot reach the extraction server at ${baseUrl}. Ensure FastAPI is running on port 8000.`
+    );
   }
 
   if (!response.ok) {
@@ -78,6 +90,7 @@ export async function streamExtract(
     } catch {
       // not JSON
     }
+    console.error(`[Stream API Error Response] Status ${response.status} (${errorCode}): ${message}`);
     throw new ApiError(response.status, errorCode, message);
   }
 
@@ -139,6 +152,7 @@ export async function streamExtract(
     if (err instanceof ApiError) {
       throw err;
     }
+    console.error("[Stream API Error] Stream connection lost mid-processing:", err);
     throw new ApiError(
       0,
       "STREAM_INTERRUPTED",

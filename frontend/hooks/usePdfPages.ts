@@ -36,8 +36,8 @@ export function usePdfPages(file: File | null, serverPageImages: string[] = []):
       return;
     }
 
-    // If image file, single page
-    if (file.type.startsWith("image/")) {
+    // If image file, single page with object URL
+    if (file.type.startsWith("image/") || /\.(png|jpe?g|webp|gif|bmp)$/i.test(file.name)) {
       const url = URL.createObjectURL(file);
       setPages([{ pageNumber: 1, imageUrl: url }]);
       setIsLoading(false);
@@ -46,15 +46,11 @@ export function usePdfPages(file: File | null, serverPageImages: string[] = []):
       };
     }
 
-    // If PDF file and no server page images yet:
-    // Create an object URL for PDF preview or fallback placeholder
-    if (file.type === "application/pdf") {
-      const url = URL.createObjectURL(file);
-      setPages([{ pageNumber: 1, imageUrl: url }]);
+    // If PDF file, track page number without setting raw PDF blob as imageUrl
+    if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+      setPages([{ pageNumber: 1 }]);
       setIsLoading(false);
-      return () => {
-        URL.revokeObjectURL(url);
-      };
+      return;
     }
 
     setPages([]);

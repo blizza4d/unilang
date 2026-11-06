@@ -110,7 +110,7 @@ export function PageCanvas({
             />
           </div>
         ) : pdfUrl ? (
-          <div className="relative w-[700px] h-[820px] bg-zinc-900 rounded border border-zinc-800 shadow-2xl overflow-hidden">
+          <div className="relative w-full h-[78vh] bg-zinc-900 rounded border border-zinc-800 shadow-2xl overflow-hidden">
             <iframe
               src={`${pdfUrl}#page=${currentPage}&toolbar=0&navpanes=0`}
               title="PDF Document Viewer"

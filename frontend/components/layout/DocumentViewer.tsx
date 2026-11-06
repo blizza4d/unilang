@@ -10,6 +10,7 @@ import {
 import { FileDropzone } from "@/components/logic/FileDropzone";
 import { ViewerToolbar } from "@/components/ui/ViewerToolbar";
 import { PageThumbnails } from "@/components/ui/PageThumbnails";
+import { HighlightOverlay } from "@/components/ui/HighlightOverlay";
 import { PageCanvas } from "./PageCanvas";
 import { formatBytes } from "@/lib/utils";
 import { useDocumentStore } from "@/store/useDocumentStore";
@@ -67,11 +68,13 @@ export const DocumentViewer: React.FC = () => {
     return <FileDropzone onFileAccepted={handleFileAccepted} />;
   }
 
-  const isPdfFile = file.type === "application/pdf" || file.name.endsWith(".pdf");
-  const currentPageInfo = pages.find((p) => p.pageNumber === currentPage);
-  const activeImage = !isPdfFile
-    ? filePreviewUrl
-    : currentPageInfo?.imageUrl;
+  // Detect MIME type and extension
+  const isPdf =
+    file.type === "application/pdf" ||
+    file.name.toLowerCase().endsWith(".pdf");
+  const isImage =
+    file.type.startsWith("image/") ||
+    /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(file.name);
 
   return (
     <div className="relative w-full h-full flex flex-col bg-[#0a0c10] overflow-hidden select-none">
@@ -99,27 +102,29 @@ export const DocumentViewer: React.FC = () => {
               {file.name}
             </h2>
             <p className="text-[11px] font-mono text-zinc-400">
-              {formatBytes(file.size)} &bull; {isPdfFile ? "PDF" : "Image"}
+              {formatBytes(file.size)} &bull; {isPdf ? "PDF Document" : isImage ? "Image" : "Document"}
             </p>
           </div>
         </div>
 
         {/* Toolbar & Action Controls */}
         <div className="flex items-center gap-2">
-          <ViewerToolbar
-            zoom={zoom}
-            rotation={rotation}
-            currentPage={currentPage}
-            totalPages={Math.max(pages.length, 1)}
-            showThumbnails={showThumbnails}
-            onZoomIn={zoomIn}
-            onZoomOut={zoomOut}
-            onResetView={resetView}
-            onRotate={rotateClockwise}
-            onPrevPage={prevPage}
-            onNextPage={nextPage}
-            onToggleThumbnails={() => setShowThumbnails((prev) => !prev)}
-          />
+          {!isPdf && (
+            <ViewerToolbar
+              zoom={zoom}
+              rotation={rotation}
+              currentPage={currentPage}
+              totalPages={Math.max(pages.length, 1)}
+              showThumbnails={showThumbnails}
+              onZoomIn={zoomIn}
+              onZoomOut={zoomOut}
+              onResetView={resetView}
+              onRotate={rotateClockwise}
+              onPrevPage={prevPage}
+              onNextPage={nextPage}
+              onToggleThumbnails={() => setShowThumbnails((prev) => !prev)}
+            />
+          )}
 
           {!extractedData && !isProcessing && (
             <button
@@ -157,12 +162,14 @@ export const DocumentViewer: React.FC = () => {
 
       {/* Main Workspace Body with Optional Thumbnails Drawer */}
       <div className="relative flex-1 w-full h-full flex overflow-hidden">
-        <PageThumbnails
-          pages={pages}
-          currentPage={currentPage}
-          onSelectPage={handlePageSelect}
-          isOpen={showThumbnails}
-        />
+        {showThumbnails && !isPdf && (
+          <PageThumbnails
+            pages={pages}
+            currentPage={currentPage}
+            onSelectPage={handlePageSelect}
+            isOpen={showThumbnails}
+          />
+        )}
 
         <div className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden">
           {/* Scanning Beam when processing */}
@@ -170,19 +177,38 @@ export const DocumentViewer: React.FC = () => {
             <div className="pointer-events-none absolute inset-x-0 h-32 bg-gradient-to-b from-transparent via-cyan-400/20 to-transparent animate-scan z-30" />
           )}
 
-          <PageCanvas
-            imageUrl={activeImage}
-            pdfUrl={isPdfFile && !activeImage ? filePreviewUrl : undefined}
-            currentPage={currentPage}
-            zoom={zoom}
-            rotation={rotation}
-            pan={pan}
-            boxes={boundingBoxes}
-            activeField={activeField}
-            onPanChange={setPan}
-            onSelectField={(f) => setActiveField(f)}
-            onHoverField={(f) => setActiveField(f)}
-          />
+          {/* Conditional Rendering: PDF Embed/Iframe vs Image */}
+          {isPdf ? (
+            <div className="relative w-full h-full flex items-center justify-center bg-[#0a0c10] p-1">
+              <iframe
+                src={`${filePreviewUrl}#toolbar=1&navpanes=0`}
+                title={file.name}
+                className="w-full h-full rounded-lg border border-zinc-800 shadow-2xl bg-zinc-950"
+              />
+              {boundingBoxes && boundingBoxes.length > 0 && (
+                <HighlightOverlay
+                  boxes={boundingBoxes}
+                  currentPage={currentPage}
+                  activeField={activeField}
+                  onSelectField={(f) => setActiveField(f)}
+                  onHoverField={(f) => setActiveField(f)}
+                />
+              )}
+            </div>
+          ) : (
+            <PageCanvas
+              imageUrl={filePreviewUrl}
+              currentPage={currentPage}
+              zoom={zoom}
+              rotation={rotation}
+              pan={pan}
+              boxes={boundingBoxes}
+              activeField={activeField}
+              onPanChange={setPan}
+              onSelectField={(f) => setActiveField(f)}
+              onHoverField={(f) => setActiveField(f)}
+            />
+          )}
         </div>
       </div>
     </div>

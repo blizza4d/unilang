@@ -1,5 +1,4 @@
 import { ApiErrorBody, FinalDocumentResponse, OverallStatus } from "@/lib/types";
-import { getApiUrl, getDefaultHeaders } from "@/lib/config";
 
 const ERROR_MESSAGE_MAP: Record<string, string> = {
   EMPTY_FILE: "That file is empty.",
@@ -75,26 +74,32 @@ export async function extractDocument(
   file: File,
   signal?: AbortSignal
 ): Promise<FinalDocumentResponse> {
-  const apiUrl = getApiUrl();
+  const baseUrl = (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.trim().length > 0)
+    ? process.env.NEXT_PUBLIC_API_URL.trim().replace(/\/+$/, "")
+    : "http://localhost:8000";
+
+  const endpoint = `${baseUrl}/api/v1/extract`;
   const formData = new FormData();
   formData.append("file", file);
 
+  console.log(`[API] Dispatching extraction request for "${file.name}" (${file.size} bytes) to ${endpoint}`);
+
   let response: Response;
   try {
-    response = await fetch(`${apiUrl}/api/v1/extract`, {
+    response = await fetch(endpoint, {
       method: "POST",
-      headers: getDefaultHeaders(),
       body: formData,
       signal,
     });
   } catch (err: unknown) {
+    console.error(`[API Network Error] Failed to reach extraction server at ${endpoint}:`, err);
     if (err instanceof DOMException && err.name === "AbortError") {
       throw err;
     }
     throw new ApiError(
       0,
       "NETWORK_ERROR",
-      ERROR_MESSAGE_MAP["NETWORK_ERROR"] ?? "Cannot reach the extraction server."
+      `Cannot reach the extraction server at ${baseUrl}. Ensure FastAPI is running on port 8000 with CORS enabled.`
     );
   }
 
@@ -115,12 +120,14 @@ export async function extractDocument(
     }
 
     const clientMessage = ERROR_MESSAGE_MAP[errorCode] ?? serverMessage;
+    console.error(`[API Error Response] Status ${response.status} (${errorCode}): ${serverMessage}`);
     throw new ApiError(response.status, errorCode, clientMessage, requestId);
   }
 
   try {
     const json = await response.json();
     if (!isFinalDocumentResponse(json)) {
+      console.error("[API Error] Server returned invalid document structure:", json);
       throw new ApiError(
         500,
         "VALIDATION_ERROR",
@@ -132,6 +139,7 @@ export async function extractDocument(
     if (err instanceof ApiError) {
       throw err;
     }
+    console.error("[API Error] JSON parse failure:", err);
     throw new ApiError(500, "CORRUPT_FILE", "Could not parse server response.");
   }
 }
