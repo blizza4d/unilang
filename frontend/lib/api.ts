@@ -1,10 +1,6 @@
 import { ApiErrorBody, FinalDocumentResponse, OverallStatus } from "@/lib/types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === "development"
-    ? "http://localhost:8000"
-    : "https://backend-tau-livid-81.vercel.app");
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const ERROR_MESSAGE_MAP: Record<string, string> = {
   EMPTY_FILE: "That file is empty.",
@@ -85,12 +81,21 @@ export async function extractDocument(
   const formData = new FormData();
   formData.append("file", file);
 
+  const headers: Record<string, string> = {};
+  if (typeof window !== "undefined") {
+    const liveCode = window.sessionStorage.getItem("live_access_code");
+    if (liveCode) {
+      headers["X-Live-Access-Code"] = liveCode;
+    }
+  }
+
   console.log(`[API] Dispatching extraction request for "${file.name}" (${file.size} bytes) to ${endpoint}`);
 
   let response: Response;
   try {
     response = await fetch(endpoint, {
       method: "POST",
+      headers,
       body: formData,
       signal,
     });

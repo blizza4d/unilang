@@ -13,11 +13,7 @@ export interface BackendConnectionStatus {
   isHttps: boolean;
 }
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === "development"
-    ? "http://localhost:8000"
-    : "https://backend-tau-livid-81.vercel.app");
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 /**
  * Resolves the active backend API base URL with strict normalization.

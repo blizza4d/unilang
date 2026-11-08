@@ -19,10 +19,11 @@ import uvicorn
 
 from config import get_settings
 from db.session import init_db
+from middleware.budget_limit import BudgetLimitMiddleware
 from middleware.rate_limit import RateLimitMiddleware
 from middleware.request_context import RequestContextMiddleware
 from middleware.security_headers import SecurityHeadersMiddleware
-from routers import batch, documents, eval as eval_router, exports, extract, health, v3_extract
+from routers import batch, client_errors as client_errors_router, documents, eval as eval_router, exports, extract, health, status as status_router, v3_extract
 from schemas.document_schemas import ErrorResponse
 from utils.file_parsers import (
     CorruptFileError,
@@ -65,6 +66,9 @@ app.add_middleware(RequestContextMiddleware)
 # 2. Security Headers Middleware
 app.add_middleware(SecurityHeadersMiddleware)
 
+# 2.5 Spend Caps & Budget Fallback Middleware
+app.add_middleware(BudgetLimitMiddleware)
+
 # 3. Rate Limit Middleware
 if settings.FEATURE_RATE_LIMIT:
     app.add_middleware(
@@ -79,9 +83,8 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://uni-lang.vercel.app",
-        "https://backend-tau-livid-81.vercel.app",
     ],
-    allow_origin_regex=settings.ALLOWED_ORIGIN_REGEX,
+    allow_origin_regex=r"^https:\/\/.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -209,6 +212,8 @@ app.include_router(batch.router)
 app.include_router(exports.router)
 app.include_router(eval_router.router)
 app.include_router(health.router)
+app.include_router(status_router.router)
+app.include_router(client_errors_router.router)
 app.include_router(v3_extract.router)
 
 
