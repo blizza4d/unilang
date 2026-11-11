@@ -7,6 +7,7 @@ import {
   Trophy,
   Sparkles,
   Command,
+  HelpCircle,
 } from "lucide-react";
 import { DocumentViewer } from "@/components/layout/DocumentViewer";
 import { DataExtractorPanel } from "@/components/layout/DataExtractorPanel";
@@ -18,6 +19,7 @@ import { CommandPalette } from "@/components/ui/CommandPalette";
 import { GuidedTour } from "@/components/ui/GuidedTour";
 import { ToastHost } from "@/components/ui/ToastHost";
 import { BackendStatusBanner } from "@/components/ui/BackendStatusBanner";
+import { KeyboardShortcutsModal } from "@/components/ui/KeyboardShortcutsModal";
 import { Footer } from "@/components/layout/Footer";
 import { useDocumentStore } from "@/store/useDocumentStore";
 import { useHistoryStore } from "@/store/useHistoryStore";
@@ -35,6 +37,7 @@ export default function HomePage() {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isScoreboardOpen, setIsScoreboardOpen] = useState(false);
   const [isTourOpen, setIsTourOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -52,6 +55,12 @@ export default function HomePage() {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setIsPaletteOpen((prev) => !prev);
+      }
+
+      // ? opens keyboard shortcuts cheat sheet
+      if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+        e.preventDefault();
+        setIsShortcutsOpen((prev) => !prev);
       }
 
       // R toggles review mode
@@ -107,7 +116,7 @@ export default function HomePage() {
             type="button"
             onClick={() => toggleHistory()}
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/5 border border-white/10 transition-colors"
-            title="Open Document History"
+            title="Open Document History (Cmd+H)"
           >
             <History className="w-3.5 h-3.5 text-cyan-400" />
             <span className="hidden md:inline">History</span>
@@ -117,7 +126,7 @@ export default function HomePage() {
             type="button"
             onClick={() => openBatch(true)}
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/5 border border-white/10 transition-colors"
-            title="Batch Multi-File Queue"
+            title="Batch Multi-File Queue (Cmd+B)"
           >
             <Layers className="w-3.5 h-3.5 text-cyan-400" />
             <span className="hidden md:inline">Batch</span>
@@ -150,6 +159,16 @@ export default function HomePage() {
           >
             <Command className="w-3 h-3" />
             <span className="text-[10px]">K</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsShortcutsOpen(true)}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-mono text-zinc-400 bg-zinc-900 border border-zinc-700/60 hover:border-cyan-500/50 hover:text-cyan-300 transition-colors"
+            title="Keyboard Shortcuts (?)"
+          >
+            <HelpCircle className="w-3 h-3 text-cyan-400/80" />
+            <span className="text-[10px]">?</span>
           </button>
         </div>
       </header>
@@ -184,6 +203,10 @@ export default function HomePage() {
       <GuidedTour
         isOpen={isTourOpen}
         onClose={() => setIsTourOpen(false)}
+      />
+      <KeyboardShortcutsModal
+        isOpen={isShortcutsOpen}
+        onClose={() => setIsShortcutsOpen(false)}
       />
       <ToastHost />
     </main>

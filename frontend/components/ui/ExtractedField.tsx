@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useId } from "react";
+import React, { useId, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { AlertTriangle, CheckCircle, UserCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle, UserCheck, Copy, Check } from "lucide-react";
 import { ValidationScore } from "@/lib/types";
 import { ConfidenceRing } from "@/components/ui/ConfidenceRing";
 import { useDocumentStore } from "@/store/useDocumentStore";
@@ -32,6 +32,7 @@ export const ExtractedField: React.FC<ExtractedFieldProps> = React.memo(
     const inputId = useId();
     const shouldReduceMotion = useReducedMotion();
     const setActiveField = useDocumentStore((state) => state.setActiveField);
+    const [copied, setCopied] = useState(false);
 
     const needsReview = validationScore?.needs_review ?? false;
     const confidence = validationScore?.confidence_score ?? 1.0;
@@ -44,13 +45,13 @@ export const ExtractedField: React.FC<ExtractedFieldProps> = React.memo(
         ? "Not found in document"
         : "—";
 
-    let containerStyle = "border border-white/5 bg-panel/50 hover:bg-white/[0.02]";
+    let containerStyle = "group border border-white/5 bg-panel/50 hover:bg-white/[0.02]";
     if (isFlaggedUnresolved) {
       containerStyle =
-        "ring-2 ring-accent-amber/50 bg-accent-amber/10 border-accent-amber/30 " +
+        "group ring-2 ring-accent-amber/50 bg-accent-amber/10 border-accent-amber/30 " +
         (shouldReduceMotion ? "" : "animate-pulse");
     } else if (isFlaggedResolved) {
-      containerStyle = "ring-1 ring-accent-green/40 bg-accent-green/5 border-accent-green/30";
+      containerStyle = "group ring-1 ring-accent-green/40 bg-accent-green/5 border-accent-green/30";
     }
 
     const handleChange = (rawText: string) => {
@@ -78,6 +79,14 @@ export const ExtractedField: React.FC<ExtractedFieldProps> = React.memo(
       }
     };
 
+    const handleCopy = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (value === undefined || value === null || value === "") return;
+      navigator.clipboard.writeText(String(value));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    };
+
     return (
       <div
         className={`p-3 rounded-xl transition-all duration-300 ${containerStyle}`}
@@ -92,7 +101,7 @@ export const ExtractedField: React.FC<ExtractedFieldProps> = React.memo(
             {label}
           </label>
 
-          <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
+          <div className="flex items-center gap-1.5 flex-1 justify-end min-w-0">
             <input
               id={inputId}
               type={inputType === "number" ? "text" : inputType}
@@ -102,10 +111,27 @@ export const ExtractedField: React.FC<ExtractedFieldProps> = React.memo(
               onFocus={handleFocus}
               onBlur={handleBlur}
               onChange={(e) => handleChange(e.target.value)}
-              className={`w-full max-w-[260px] text-right bg-transparent border-none focus:ring-0 outline-none text-bright text-sm transition-colors ${
+              className={`w-full max-w-[240px] text-right bg-transparent border-none focus:ring-0 outline-none text-bright text-sm transition-colors ${
                 inputType === "number" ? "font-mono tabular-nums" : ""
               } placeholder:text-muted/60`}
             />
+
+            {/* Quick-copy button */}
+            {value !== "" && value !== undefined && value !== null && (
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 rounded text-zinc-500 hover:text-zinc-200 transition-opacity shrink-0"
+                title="Copy value"
+                aria-label={`Copy ${label}`}
+              >
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 text-accent-green" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
+              </button>
+            )}
 
             {isReviewMode && (
               <div className="flex items-center gap-1.5 shrink-0">
@@ -159,48 +185,34 @@ export const ExtractedField: React.FC<ExtractedFieldProps> = React.memo(
           </div>
         </div>
 
-        <AnimatePresence>
-          {isFlaggedUnresolved && reasoning && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: "easeOut" }}
-              className="overflow-hidden"
-            >
-              <div
-                className="mt-2 pt-2 border-t border-accent-amber/20 flex items-start gap-1.5 text-xs text-accent-amber"
-                aria-live="polite"
-              >
-                <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                <span className="font-mono leading-relaxed">{reasoning}</span>
-              </div>
-            </motion.div>
-          )}
-
-          {isFlaggedResolved && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: "easeOut" }}
-              className="overflow-hidden"
-            >
-              <div
-                className="mt-2 pt-2 border-t border-accent-green/20 flex items-center gap-1.5 text-xs text-accent-green font-medium"
-                aria-live="polite"
-              >
-                <UserCheck className="w-3.5 h-3.5 shrink-0" />
-                <span>Corrected by reviewer</span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Explainability drawer for flagged fields */}
+        {isReviewMode && needsReview && reasoning && (
+          <div
+            className={`mt-2 pt-2 border-t text-[11px] font-mono leading-relaxed transition-colors ${
+              isResolved
+                ? "border-accent-green/20 text-accent-green"
+                : "border-accent-amber/20 text-accent-amber"
+            }`}
+          >
+            <div className="flex items-center gap-1.5 font-sans font-medium text-xs mb-0.5">
+              {isResolved ? (
+                <>
+                  <UserCheck className="w-3.5 h-3.5 shrink-0" />
+                  <span>Review Complete: Verified & Overridden</span>
+                </>
+              ) : (
+                <>
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                  <span>Validation Warning:</span>
+                </>
+              )}
+            </div>
+            <p className="opacity-90">{reasoning}</p>
+          </div>
+        )}
       </div>
     );
   }
 );
 
 ExtractedField.displayName = "ExtractedField";
-
-export default ExtractedField;

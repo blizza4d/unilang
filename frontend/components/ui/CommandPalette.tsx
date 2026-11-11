@@ -14,6 +14,11 @@ import {
   ZoomOut,
   Layers,
   HelpCircle,
+  FileText,
+  AlertCircle,
+  Globe,
+  Receipt,
+  ShieldAlert,
 } from "lucide-react";
 import { useDocumentStore } from "@/store/useDocumentStore";
 import { useHistoryStore } from "@/store/useHistoryStore";
@@ -53,6 +58,21 @@ export function CommandPalette({
   const file = useDocumentStore((state) => state.file);
   const toggleHistory = useHistoryStore((state) => state.toggleOpen);
   const openBatch = useBatchStore((state) => state.setIsOpen);
+
+  const loadSample = async (filename: string, path: string) => {
+    try {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error("Failed to load sample");
+      const blob = await res.blob();
+      const f = new File([blob], filename, { type: "application/pdf" });
+      useDocumentStore.getState().setFile(f);
+      setTimeout(() => {
+        useDocumentStore.getState().processFile();
+      }, 50);
+    } catch (err) {
+      console.error("Failed to load sample:", err);
+    }
+  };
 
   const commands: CommandItem[] = useMemo(
     () => [
@@ -163,6 +183,66 @@ export function CommandPalette({
         icon: HelpCircle,
         action: () => {
           onStartTour();
+          onClose();
+        },
+      },
+      {
+        id: "sample-de",
+        title: "Load Sample: German Invoice (€500 Math Discrepancy)",
+        category: "Samples",
+        icon: AlertCircle,
+        action: () => {
+          loadSample("sample_de_math_error.pdf", "/samples/sample_de_math_error.pdf");
+          onClose();
+        },
+      },
+      {
+        id: "sample-en",
+        title: "Load Sample: Clean SaaS Invoice (USD 100% Match)",
+        category: "Samples",
+        icon: FileText,
+        action: () => {
+          loadSample("sample_en_clean.pdf", "/samples/sample_en_clean.pdf");
+          onClose();
+        },
+      },
+      {
+        id: "sample-hi",
+        title: "Load Sample: Hindi GST Invoice (Devanagari Dual Tax)",
+        category: "Samples",
+        icon: Globe,
+        action: () => {
+          loadSample("sample_hi_gst.pdf", "/samples/sample_hi_gst.pdf");
+          onClose();
+        },
+      },
+      {
+        id: "sample-ar",
+        title: "Load Sample: Arabic Riyadh Invoice (RTL 15% VAT)",
+        category: "Samples",
+        icon: Globe,
+        action: () => {
+          loadSample("sample_ar_rtl.pdf", "/samples/sample_ar_rtl.pdf");
+          onClose();
+        },
+      },
+      {
+        id: "sample-receipt",
+        title: "Load Sample: POS Thermal Expense Receipt (USD)",
+        category: "Samples",
+        icon: Receipt,
+        action: () => {
+          loadSample("sample_receipt_blurry.pdf", "/samples/sample_receipt_blurry.pdf");
+          onClose();
+        },
+      },
+      {
+        id: "sample-injection",
+        title: "Load Sample: Prompt Injection Test (Security Defense)",
+        category: "Samples",
+        icon: ShieldAlert,
+        action: () => {
+          loadSample("sample_injection_test.pdf", "/samples/sample_injection_test.pdf");
           onClose();
         },
       },

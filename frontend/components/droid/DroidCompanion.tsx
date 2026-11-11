@@ -12,6 +12,15 @@ interface DroidCompanionProps {
   renderMode?: "full" | "strip" | "compact";
 }
 
+const NOVA_TIPS = [
+  "Nova: 'All math is verified with Python Decimal precision!'",
+  "Nova: 'Tip: Press R anytime to enter Review Mode.'",
+  "Nova: 'Tip: Press ? to view all keyboard shortcuts.'",
+  "Nova: 'Tip: Hover any field to see its bounding box!'",
+  "Nova: 'Beep boop! Ready for your next invoice!'",
+  "Nova: 'Tip: Press Cmd/Ctrl+K for the Command Palette.'",
+];
+
 export const DroidCompanion: React.FC<DroidCompanionProps> = ({
   className = "",
   renderMode = "strip",
@@ -25,6 +34,8 @@ export const DroidCompanion: React.FC<DroidCompanionProps> = ({
   const reducedMotion = usePrefersReducedMotion();
   const [isEnabled, setIsEnabled] = useState<boolean>(true);
   const [celebrateActive, setCelebrateActive] = useState<boolean>(false);
+  const [tipIndex, setTipIndex] = useState<number>(0);
+  const [activeTip, setActiveTip] = useState<string | null>(null);
 
   // Check user preference ("Show Nova")
   useEffect(() => {
@@ -49,12 +60,30 @@ export const DroidCompanion: React.FC<DroidCompanionProps> = ({
     }
   }, [extractedData?.overall_status]);
 
+  const handleDroidClick = () => {
+    const nextTip = NOVA_TIPS[tipIndex % NOVA_TIPS.length] ?? NOVA_TIPS[0]!;
+    setTipIndex((prev) => prev + 1);
+    setActiveTip(nextTip);
+    setCelebrateActive(true);
+    setTimeout(() => setCelebrateActive(false), 1200);
+    setTimeout(() => setActiveTip(null), 4000);
+  };
+
   const { state, glow, caption, facing } = useMemo<{
     state: DroidState;
     glow: DroidGlow;
     caption: string;
     facing: DroidFacing;
   }>(() => {
+    if (activeTip) {
+      return {
+        state: "celebrate",
+        glow: "green",
+        caption: activeTip,
+        facing: "right",
+      };
+    }
+
     if (error) {
       return {
         state: "error",
@@ -138,20 +167,35 @@ export const DroidCompanion: React.FC<DroidCompanionProps> = ({
       caption: "Nova ready to inspect invoices.",
       facing: "right",
     };
-  }, [error, celebrateActive, isProcessing, currentStage, extractedData, file]);
+  }, [activeTip, error, celebrateActive, isProcessing, currentStage, extractedData, file]);
 
   if (!isEnabled) {
     return null;
   }
 
   const droidElement = (
-    <Droid
-      state={reducedMotion ? "idle" : state}
-      facing={facing}
-      size={renderMode === "compact" ? 44 : 64}
-      glow={glow}
-      paused={reducedMotion}
-    />
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={handleDroidClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleDroidClick();
+        }
+      }}
+      className="cursor-pointer active:scale-90 transition-transform select-none outline-none focus:ring-1 focus:ring-cyan-500/50 rounded-lg"
+      title="Click Nova for tips & greeting!"
+      aria-label="Nova Droid companion (click for tips)"
+    >
+      <Droid
+        state={reducedMotion ? "idle" : state}
+        facing={facing}
+        size={renderMode === "compact" ? 44 : 64}
+        glow={glow}
+        paused={reducedMotion}
+      />
+    </div>
   );
 
   if (renderMode === "strip") {
