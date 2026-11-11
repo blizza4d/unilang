@@ -32,6 +32,8 @@ export interface FinalDocumentResponse {
   extracted_data: ExtractedInvoice;
   validation_metrics: ValidationScore[];
   overall_status: OverallStatus;
+  source?: string | null;
+  is_demo?: boolean;
 }
 
 export interface BoundingBox {

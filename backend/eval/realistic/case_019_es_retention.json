@@ -1,0 +1,24 @@
+{
+  "id": "case_019_es_retention",
+  "language": "es",
+  "layout": "two_col",
+  "currency": "EUR",
+  "ground_truth": {
+    "vendor_name": "Consultoria Arquitectura SL",
+    "invoice_number": "INV-019",
+    "date": "11/02/2026",
+    "currency": "EUR",
+    "total_amount": 968.0,
+    "tax_amount": 168.0,
+    "line_items": [
+      {
+        "description": "Planos Tecnicos y Licencia",
+        "quantity": 1.0,
+        "unit_price": 800.0,
+        "total_price": 800.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

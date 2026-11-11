@@ -20,7 +20,7 @@ async def health_liveness() -> Dict[str, Any]:
     return {
         "status": "ok",
         "service": "datanova-extract",
-        "version": "2.0.0",
+        "version": "1.0.0-rc.1",
         "uptime_seconds": round(time.time() - SERVER_START_TIME, 1),
     }
 

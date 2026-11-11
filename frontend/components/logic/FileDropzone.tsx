@@ -5,6 +5,7 @@ import { useDropzone, FileRejection } from "react-dropzone";
 import { motion, useReducedMotion } from "framer-motion";
 import { FileText, Globe2, UploadCloud, Layers } from "lucide-react";
 import { useBatchStore } from "@/store/useBatchStore";
+import { SampleButtons } from "@/components/ui/SampleButtons";
 
 export interface FileDropzoneProps {
   onFileAccepted: (file: File) => void;
@@ -53,7 +54,6 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
       } else if (acceptedFiles.length > 1) {
         startBatch(acceptedFiles);
       }
-
     },
     [onFileAccepted, startBatch]
   );
@@ -92,9 +92,9 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
       <div
         {...getRootProps()}
         tabIndex={0}
-        className={`w-full max-w-xl min-h-[420px] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all duration-200 outline-none ${borderState}`}
+        className={`w-full max-w-xl min-h-[380px] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all duration-200 outline-none ${borderState}`}
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} aria-label="Upload document" />
 
         <motion.div
           animate={{ scale: isDragActive && !shouldReduceMotion ? 1.08 : 1 }}
@@ -147,6 +147,9 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
           </div>
         </div>
       </div>
+
+      {/* One-Click Bundled Sample Invoices */}
+      <SampleButtons onSelectSample={onFileAccepted} disabled={disabled} />
     </div>
   );
 };

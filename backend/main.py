@@ -54,7 +54,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(
     title="DataNova Extract API",
-    version="2.0.0",
+    version="1.0.0-rc.1",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,

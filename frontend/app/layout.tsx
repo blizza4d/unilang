@@ -15,9 +15,49 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DataNova Extract | Intelligent Document Understanding",
+  metadataBase: new URL("https://uni-lang.vercel.app"),
+  title: "DataNova Extract | Multilingual Document Understanding",
   description:
-    "Enterprise-grade, multilingual intelligent document understanding SaaS powered by multi-agent LangGraph architecture.",
+    "Intelligent multilingual invoice understanding powered by LangGraph multi-agent architecture, deterministic math verification, and human-in-the-loop review.",
+  keywords: [
+    "invoice extraction",
+    "document AI",
+    "multilingual OCR",
+    "LangGraph",
+    "FastAPI",
+    "Next.js",
+    "math verification",
+    "human in the loop",
+  ],
+  authors: [{ name: "DataNova Extract Team" }],
+  openGraph: {
+    title: "DataNova Extract | Multilingual Document Understanding",
+    description:
+      "Intelligent multilingual invoice understanding with deterministic arithmetic verification and interactive human review.",
+    url: "https://uni-lang.vercel.app",
+    siteName: "DataNova Extract",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "DataNova Extract v1.0.0-rc.1 Interface Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DataNova Extract | Multilingual Document Understanding",
+    description:
+      "Intelligent multilingual invoice understanding with deterministic arithmetic verification.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export const viewport: Viewport = {

@@ -24,6 +24,15 @@ async def initialize_test_database():
             await conn.execute(table.delete())
 
 
+@pytest.fixture(autouse=True)
+def clean_test_settings(monkeypatch):
+    get_settings.cache_clear()
+    settings = get_settings()
+    monkeypatch.setattr(settings, "FEATURE_DEMO_MODE", True)
+    yield
+    get_settings.cache_clear()
+
+
 @pytest_asyncio.fixture
 async def client() -> AsyncGenerator[AsyncClient, None]:
     transport = ASGITransport(app=app)

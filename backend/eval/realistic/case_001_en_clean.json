@@ -1,0 +1,30 @@
+{
+  "id": "case_001_en_clean",
+  "language": "en",
+  "layout": "single_col",
+  "currency": "USD",
+  "ground_truth": {
+    "vendor_name": "Apex Cloud Systems Inc.",
+    "invoice_number": "INV-001",
+    "date": "2026-02-15",
+    "currency": "USD",
+    "total_amount": 1250.0,
+    "tax_amount": 125.0,
+    "line_items": [
+      {
+        "description": "Cloud Compute Nodes",
+        "quantity": 2.0,
+        "unit_price": 500.0,
+        "total_price": 1000.0
+      },
+      {
+        "description": "Managed DB Storage",
+        "quantity": 1.0,
+        "unit_price": 125.0,
+        "total_price": 125.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

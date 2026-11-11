@@ -1,0 +1,24 @@
+{
+  "id": "case_037_ja_fullwidth",
+  "language": "ja",
+  "layout": "two_col",
+  "currency": "JPY",
+  "ground_truth": {
+    "vendor_name": "Nagoya Automation KK",
+    "invoice_number": "INV-037",
+    "date": "2026年02月20日",
+    "currency": "JPY",
+    "total_amount": 88000.0,
+    "tax_amount": 8000.0,
+    "line_items": [
+      {
+        "description": "Stepper Motor Unit",
+        "quantity": 4.0,
+        "unit_price": 20000.0,
+        "total_price": 80000.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

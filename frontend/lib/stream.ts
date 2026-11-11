@@ -4,12 +4,7 @@ import {
   StageStatus,
 } from "@/lib/types";
 import { ApiError } from "@/lib/api";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === "development"
-    ? "http://localhost:8000"
-    : "https://backend-tau-livid-81.vercel.app");
+import { getApiUrl } from "@/lib/config";
 
 export interface PipelineEventPayload {
   event_id: string;
@@ -49,7 +44,7 @@ export async function streamExtract(
   handlers: StreamHandlers,
   signal?: AbortSignal
 ): Promise<void> {
-  const baseUrl = API_BASE_URL.replace(/\/+$/, "");
+  const baseUrl = getApiUrl();
   const endpoint = `${baseUrl}/api/v1/extract/stream`;
   const formData = new FormData();
   formData.append("file", file);
@@ -59,6 +54,12 @@ export async function streamExtract(
   };
   if (process.env.NEXT_PUBLIC_API_KEY) {
     headers["X-API-Key"] = process.env.NEXT_PUBLIC_API_KEY;
+  }
+  if (typeof window !== "undefined") {
+    const liveCode = window.sessionStorage.getItem("live_access_code");
+    if (liveCode) {
+      headers["X-Live-Access-Code"] = liveCode;
+    }
   }
 
   console.log(`[Stream API] Initiating stream extract for "${file.name}" to ${endpoint}`);

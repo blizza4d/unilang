@@ -1,0 +1,30 @@
+{
+  "id": "case_036_ja_multi_rate",
+  "language": "ja",
+  "layout": "table_heavy",
+  "currency": "JPY",
+  "ground_truth": {
+    "vendor_name": "Osaka Industrial Supplies",
+    "invoice_number": "INV-036",
+    "date": "2026年01月25日",
+    "currency": "JPY",
+    "total_amount": 43200.0,
+    "tax_amount": 3200.0,
+    "line_items": [
+      {
+        "description": "Food Supplies (8% Tax)",
+        "quantity": 1.0,
+        "unit_price": 20000.0,
+        "total_price": 20000.0
+      },
+      {
+        "description": "Packaging Materials (10% Tax)",
+        "quantity": 1.0,
+        "unit_price": 20000.0,
+        "total_price": 20000.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

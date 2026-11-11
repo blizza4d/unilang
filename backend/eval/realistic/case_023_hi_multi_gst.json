@@ -1,0 +1,24 @@
+{
+  "id": "case_023_hi_multi_gst",
+  "language": "hi",
+  "layout": "table_heavy",
+  "currency": "INR",
+  "ground_truth": {
+    "vendor_name": "Tata Steel Distribution",
+    "invoice_number": "INV-023",
+    "date": "2026-03-05",
+    "currency": "INR",
+    "total_amount": 35400.0,
+    "tax_amount": 5400.0,
+    "line_items": [
+      {
+        "description": "Steel Rebars 12mm",
+        "quantity": 30.0,
+        "unit_price": 1000.0,
+        "total_price": 30000.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

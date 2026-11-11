@@ -215,4 +215,6 @@ async def run_demo_pipeline(
         page_count=1,
         processing_ms=1250,
         usage=UsageSummary(input_tokens=1650, output_tokens=320, estimated_cost_usd=0.009),
+        source="demo_fixture",
+        is_demo=True,
     )

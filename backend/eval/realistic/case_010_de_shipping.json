@@ -1,0 +1,30 @@
+{
+  "id": "case_010_de_shipping",
+  "language": "de",
+  "layout": "two_col",
+  "currency": "EUR",
+  "ground_truth": {
+    "vendor_name": "Werkzeug Handel Nord",
+    "invoice_number": "INV-010",
+    "date": "22.02.2026",
+    "currency": "EUR",
+    "total_amount": 737.8,
+    "tax_amount": 117.8,
+    "line_items": [
+      {
+        "description": "Präzisions-Bohrerset",
+        "quantity": 2.0,
+        "unit_price": 300.0,
+        "total_price": 600.0
+      },
+      {
+        "description": "Express Versand",
+        "quantity": 1.0,
+        "unit_price": 20.0,
+        "total_price": 20.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

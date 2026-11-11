@@ -19,6 +19,7 @@ import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 
 import { ReviewToggle } from "@/components/ui/ReviewToggle";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { DemoPill } from "@/components/ui/DemoPill";
 import { useReviewProgress } from "@/hooks/useReviewProgress";
 import {
   LineItem,
@@ -127,6 +128,7 @@ export const DataExtractorPanel: React.FC = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <DemoPill source={extractedData.source} />
                   <StatusBadge status={extractedData.overall_status} />
                 </div>
               </div>

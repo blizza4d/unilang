@@ -1,5 +1,5 @@
 import pytest
-from agents.grounding_agent import sanitize_box_coords
+from agents.grounding_agent import RawBox, _sanitize_box, sanitize_box_coords
 from utils.grounding_verify import calculate_iou, verify_box_dimensions
 
 
@@ -17,6 +17,17 @@ def test_sanitize_box_coords_inversion_fix():
     assert sanitized[0] <= sanitized[2]
     assert sanitized[1] <= sanitized[3]
     assert sanitized == [200, 100, 600, 700]
+
+
+def test_sanitize_box_xy_parity():
+    """Catches Mutation 5: Verifies that x and y coordinates are preserved and not swapped."""
+    raw = RawBox(page=1, x=0.15, y=0.85, width=0.30, height=0.08)
+    box = _sanitize_box(raw, max_page=1)
+    assert box is not None
+    assert box.x == 0.15, f"Expected x=0.15, got {box.x} (x and y may be swapped)"
+    assert box.y == 0.85, f"Expected y=0.85, got {box.y} (x and y may be swapped)"
+    assert box.width == 0.30
+    assert box.height == 0.08
 
 
 def test_calculate_iou_exact_match():

@@ -83,6 +83,8 @@ class FinalDocumentResponse(BaseModel):
     extracted_data: ExtractedInvoice
     validation_metrics: list[ValidationScore]
     overall_status: Literal["APPROVED", "REQUIRES_HUMAN_REVIEW", "FAILED"]
+    source: str | None = None
+    is_demo: bool = False
 
 
 def derive_overall_status(

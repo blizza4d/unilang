@@ -130,3 +130,26 @@ def test_apply_math_overrides_forces_review_and_caps_confidence():
 
     assert score_map["total_amount"].needs_review is True
     assert score_map["total_amount"].confidence_score <= 0.5
+
+
+def test_threshold_exact_boundary_comparison():
+    """Catches Mutation 3: Verifies strict `<` threshold comparison (score == threshold does NOT trigger review)."""
+    invoice = ExtractedInvoice(
+        vendor_name="Boundary Inc",
+        invoice_number="INV-BOUND",
+        date="2026-03-15",
+        currency="USD",
+        total_amount=100.00,
+        tax_amount=0.00,
+        line_items=[
+            LineItem(description="Item", quantity=1.0, unit_price=100.00, total_price=100.00)
+        ],
+    )
+    report = run_math_report(invoice, tolerance=0.01)
+    assert report.all_passed
+
+    initial_scores = [
+        ValidationScore(field_name="vendor_name", confidence_score=0.85, needs_review=False, reasoning="Exact threshold score"),
+    ]
+    overridden = apply_math_overrides(initial_scores, report, threshold=0.85)
+    assert overridden[0].needs_review is False, "Score equal to threshold must NOT trigger review (strict `<` required)"

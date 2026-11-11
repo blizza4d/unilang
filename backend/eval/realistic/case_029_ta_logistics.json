@@ -1,0 +1,24 @@
+{
+  "id": "case_029_ta_logistics",
+  "language": "ta",
+  "layout": "two_col",
+  "currency": "INR",
+  "ground_truth": {
+    "vendor_name": "Tirupur Textile Logistics",
+    "invoice_number": "INV-029",
+    "date": "2026-02-25",
+    "currency": "INR",
+    "total_amount": 17700.0,
+    "tax_amount": 2700.0,
+    "line_items": [
+      {
+        "description": "Container Shipping",
+        "quantity": 1.0,
+        "unit_price": 15000.0,
+        "total_price": 15000.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

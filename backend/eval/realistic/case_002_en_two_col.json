@@ -1,0 +1,30 @@
+{
+  "id": "case_002_en_two_col",
+  "language": "en",
+  "layout": "two_col",
+  "currency": "USD",
+  "ground_truth": {
+    "vendor_name": "Starlight Consulting LLC",
+    "invoice_number": "INV-002",
+    "date": "03/10/2026",
+    "currency": "USD",
+    "total_amount": 4800.5,
+    "tax_amount": 400.0,
+    "line_items": [
+      {
+        "description": "Strategic Advisory",
+        "quantity": 20.0,
+        "unit_price": 200.0,
+        "total_price": 4000.0
+      },
+      {
+        "description": "Security Review",
+        "quantity": 4.0,
+        "unit_price": 100.125,
+        "total_price": 400.5
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

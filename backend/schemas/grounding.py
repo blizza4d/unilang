@@ -65,3 +65,5 @@ class ExtendedDocumentResponse(BaseModel):
     page_count: int = 1
     processing_ms: int = 0
     usage: UsageSummary | None = None
+    source: str | None = None
+    is_demo: bool = False

@@ -6,6 +6,7 @@ import {
   Play,
   RefreshCw,
   Trash2,
+  X,
 } from "lucide-react";
 import { FileDropzone } from "@/components/logic/FileDropzone";
 import { ViewerToolbar } from "@/components/ui/ViewerToolbar";
@@ -29,6 +30,7 @@ export const DocumentViewer: React.FC = () => {
   const setActivePage = useDocumentStore((state) => state.setActivePage);
   const setFile = useDocumentStore((state) => state.setFile);
   const resetStore = useDocumentStore((state) => state.resetStore);
+  const cancelProcessing = useDocumentStore((state) => state.cancelProcessing);
   const processFile = useDocumentStore((state) => state.processFile);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -124,6 +126,18 @@ export const DocumentViewer: React.FC = () => {
               onNextPage={nextPage}
               onToggleThumbnails={() => setShowThumbnails((prev) => !prev)}
             />
+          )}
+
+          {isProcessing && (
+            <button
+              type="button"
+              onClick={() => cancelProcessing()}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30 transition-all"
+              title="Cancel ongoing extraction"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Cancel</span>
+            </button>
           )}
 
           {!extractedData && !isProcessing && (

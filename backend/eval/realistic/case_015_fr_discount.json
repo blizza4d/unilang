@@ -1,0 +1,24 @@
+{
+  "id": "case_015_fr_discount",
+  "language": "fr",
+  "layout": "two_col",
+  "currency": "EUR",
+  "ground_truth": {
+    "vendor_name": "Mobilier de Bureau Direct",
+    "invoice_number": "INV-015",
+    "date": "25/01/2026",
+    "currency": "EUR",
+    "total_amount": 900.0,
+    "tax_amount": 150.0,
+    "line_items": [
+      {
+        "description": "Fauteuil Ergonomique Pro",
+        "quantity": 3.0,
+        "unit_price": 250.0,
+        "total_price": 750.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

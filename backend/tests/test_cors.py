@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from main import app
+from config import get_settings
 
 
 @pytest.fixture
@@ -40,3 +41,11 @@ def test_cors_disallows_untrusted_origin(client):
     response = client.options("/api/v1/extract", headers=headers)
     # Untrusted origin should NOT receive access-control-allow-origin
     assert response.headers.get("access-control-allow-origin") != "https://evil-phishing-site.com"
+
+
+def test_vercel_origin_explicitly_in_allowed_origins():
+    """Catches Mutation 1: Verifies https://uni-lang.vercel.app is explicitly in ALLOWED_ORIGINS."""
+    settings = get_settings()
+    assert "https://uni-lang.vercel.app" in settings.ALLOWED_ORIGINS, (
+        "Production frontend domain https://uni-lang.vercel.app MUST be explicitly listed in ALLOWED_ORIGINS"
+    )

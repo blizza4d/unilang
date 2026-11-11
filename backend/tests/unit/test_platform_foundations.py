@@ -5,6 +5,8 @@ from pathlib import Path
 from storage.local import LocalObjectStore
 from cache.redis_cache import AsyncCache
 from db.health import check_database_health
+from db.repository import create_document, get_document
+from db.session import async_session_factory
 
 
 @pytest.fixture
@@ -80,3 +82,30 @@ async def test_db_health_check():
     assert health["status"] in ("healthy", "unhealthy")
     assert "latency_ms" in health
     assert "current_revision" in health
+
+
+@pytest.mark.asyncio
+async def test_create_document_persists_to_db():
+    """Catches Mutation 7: Verifies database commit persists across sessions (removing await fails this)."""
+    async with async_session_factory() as session1:
+        doc = await create_document(
+            session=session1,
+            filename="commit_test.pdf",
+            mime="application/pdf",
+            size_bytes=100,
+            sha256="fake_sha_commit_test_12345",
+            page_count=1,
+            status="APPROVED",
+            vendor_name="Commit Corp",
+            invoice_number="INV-COMMIT",
+            total_amount=50.0,
+            currency="USD",
+            result_dict={"extracted_data": {}, "validation_metrics": []},
+        )
+        doc_id = doc.id
+
+    # Verify in a completely fresh session
+    async with async_session_factory() as session2:
+        retrieved = await get_document(session2, doc_id)
+        assert retrieved is not None, "Document was not persisted to database; commit was not awaited or rolled back"
+        assert retrieved.vendor_name == "Commit Corp"

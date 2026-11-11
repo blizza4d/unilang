@@ -1,0 +1,296 @@
+[
+  {
+    "id": "case_001_en_clean",
+    "pdf": "case_001_en_clean.pdf",
+    "json": "case_001_en_clean.json",
+    "language": "en",
+    "adversarial": null
+  },
+  {
+    "id": "case_002_en_two_col",
+    "pdf": "case_002_en_two_col.pdf",
+    "json": "case_002_en_two_col.json",
+    "language": "en",
+    "adversarial": null
+  },
+  {
+    "id": "case_003_en_table_heavy",
+    "pdf": "case_003_en_table_heavy.pdf",
+    "json": "case_003_en_table_heavy.json",
+    "language": "en",
+    "adversarial": null
+  },
+  {
+    "id": "case_004_en_receipt",
+    "pdf": "case_004_en_receipt.pdf",
+    "json": "case_004_en_receipt.json",
+    "language": "en",
+    "adversarial": null
+  },
+  {
+    "id": "case_005_en_landscape",
+    "pdf": "case_005_en_landscape.pdf",
+    "json": "case_005_en_landscape.json",
+    "language": "en",
+    "adversarial": null
+  },
+  {
+    "id": "case_006_de_standard",
+    "pdf": "case_006_de_standard.pdf",
+    "json": "case_006_de_standard.json",
+    "language": "de",
+    "adversarial": null
+  },
+  {
+    "id": "case_007_de_discount",
+    "pdf": "case_007_de_discount.pdf",
+    "json": "case_007_de_discount.json",
+    "language": "de",
+    "adversarial": null
+  },
+  {
+    "id": "case_008_de_multi_rate",
+    "pdf": "case_008_de_multi_rate.pdf",
+    "json": "case_008_de_multi_rate.json",
+    "language": "de",
+    "adversarial": null
+  },
+  {
+    "id": "case_009_de_credit_note",
+    "pdf": "case_009_de_credit_note.pdf",
+    "json": "case_009_de_credit_note.json",
+    "language": "de",
+    "adversarial": null
+  },
+  {
+    "id": "case_010_de_shipping",
+    "pdf": "case_010_de_shipping.pdf",
+    "json": "case_010_de_shipping.json",
+    "language": "de",
+    "adversarial": null
+  },
+  {
+    "id": "case_011_fr_standard",
+    "pdf": "case_011_fr_standard.pdf",
+    "json": "case_011_fr_standard.json",
+    "language": "fr",
+    "adversarial": null
+  },
+  {
+    "id": "case_012_fr_verbal_date",
+    "pdf": "case_012_fr_verbal_date.pdf",
+    "json": "case_012_fr_verbal_date.json",
+    "language": "fr",
+    "adversarial": null
+  },
+  {
+    "id": "case_013_fr_multi_line",
+    "pdf": "case_013_fr_multi_line.pdf",
+    "json": "case_013_fr_multi_line.json",
+    "language": "fr",
+    "adversarial": null
+  },
+  {
+    "id": "case_014_fr_inclusive_tax",
+    "pdf": "case_014_fr_inclusive_tax.pdf",
+    "json": "case_014_fr_inclusive_tax.json",
+    "language": "fr",
+    "adversarial": null
+  },
+  {
+    "id": "case_015_fr_discount",
+    "pdf": "case_015_fr_discount.pdf",
+    "json": "case_015_fr_discount.json",
+    "language": "fr",
+    "adversarial": null
+  },
+  {
+    "id": "case_016_es_standard",
+    "pdf": "case_016_es_standard.pdf",
+    "json": "case_016_es_standard.json",
+    "language": "es",
+    "adversarial": null
+  },
+  {
+    "id": "case_017_es_multi_items",
+    "pdf": "case_017_es_multi_items.pdf",
+    "json": "case_017_es_multi_items.json",
+    "language": "es",
+    "adversarial": null
+  },
+  {
+    "id": "case_018_es_reduced_tax",
+    "pdf": "case_018_es_reduced_tax.pdf",
+    "json": "case_018_es_reduced_tax.json",
+    "language": "es",
+    "adversarial": null
+  },
+  {
+    "id": "case_019_es_retention",
+    "pdf": "case_019_es_retention.pdf",
+    "json": "case_019_es_retention.json",
+    "language": "es",
+    "adversarial": null
+  },
+  {
+    "id": "case_020_es_credit_note",
+    "pdf": "case_020_es_credit_note.pdf",
+    "json": "case_020_es_credit_note.json",
+    "language": "es",
+    "adversarial": null
+  },
+  {
+    "id": "case_021_hi_gst_clean",
+    "pdf": "case_021_hi_gst_clean.pdf",
+    "json": "case_021_hi_gst_clean.json",
+    "language": "hi",
+    "adversarial": null
+  },
+  {
+    "id": "case_022_hi_lakh_grouping",
+    "pdf": "case_022_hi_lakh_grouping.pdf",
+    "json": "case_022_hi_lakh_grouping.json",
+    "language": "hi",
+    "adversarial": null
+  },
+  {
+    "id": "case_023_hi_multi_gst",
+    "pdf": "case_023_hi_multi_gst.pdf",
+    "json": "case_023_hi_multi_gst.json",
+    "language": "hi",
+    "adversarial": null
+  },
+  {
+    "id": "case_024_hi_dual_tax",
+    "pdf": "case_024_hi_dual_tax.pdf",
+    "json": "case_024_hi_dual_tax.json",
+    "language": "hi",
+    "adversarial": null
+  },
+  {
+    "id": "case_025_hi_zero_tax",
+    "pdf": "case_025_hi_zero_tax.pdf",
+    "json": "case_025_hi_zero_tax.json",
+    "language": "hi",
+    "adversarial": null
+  },
+  {
+    "id": "case_026_ta_standard",
+    "pdf": "case_026_ta_standard.pdf",
+    "json": "case_026_ta_standard.json",
+    "language": "ta",
+    "adversarial": null
+  },
+  {
+    "id": "case_027_ta_hardware",
+    "pdf": "case_027_ta_hardware.pdf",
+    "json": "case_027_ta_hardware.json",
+    "language": "ta",
+    "adversarial": null
+  },
+  {
+    "id": "case_028_ta_service",
+    "pdf": "case_028_ta_service.pdf",
+    "json": "case_028_ta_service.json",
+    "language": "ta",
+    "adversarial": null
+  },
+  {
+    "id": "case_029_ta_logistics",
+    "pdf": "case_029_ta_logistics.pdf",
+    "json": "case_029_ta_logistics.json",
+    "language": "ta",
+    "adversarial": null
+  },
+  {
+    "id": "case_030_ar_riyadh",
+    "pdf": "case_030_ar_riyadh.pdf",
+    "json": "case_030_ar_riyadh.json",
+    "language": "ar",
+    "adversarial": null
+  },
+  {
+    "id": "case_031_ar_dubai",
+    "pdf": "case_031_ar_dubai.pdf",
+    "json": "case_031_ar_dubai.json",
+    "language": "ar",
+    "adversarial": null
+  },
+  {
+    "id": "case_032_ar_consulting",
+    "pdf": "case_032_ar_consulting.pdf",
+    "json": "case_032_ar_consulting.json",
+    "language": "ar",
+    "adversarial": null
+  },
+  {
+    "id": "case_033_ar_hardware",
+    "pdf": "case_033_ar_hardware.pdf",
+    "json": "case_033_ar_hardware.json",
+    "language": "ar",
+    "adversarial": null
+  },
+  {
+    "id": "case_034_ja_standard",
+    "pdf": "case_034_ja_standard.pdf",
+    "json": "case_034_ja_standard.json",
+    "language": "ja",
+    "adversarial": null
+  },
+  {
+    "id": "case_035_ja_software",
+    "pdf": "case_035_ja_software.pdf",
+    "json": "case_035_ja_software.json",
+    "language": "ja",
+    "adversarial": null
+  },
+  {
+    "id": "case_036_ja_multi_rate",
+    "pdf": "case_036_ja_multi_rate.pdf",
+    "json": "case_036_ja_multi_rate.json",
+    "language": "ja",
+    "adversarial": null
+  },
+  {
+    "id": "case_037_ja_fullwidth",
+    "pdf": "case_037_ja_fullwidth.pdf",
+    "json": "case_037_ja_fullwidth.json",
+    "language": "ja",
+    "adversarial": null
+  },
+  {
+    "id": "case_038_zh_fapiao",
+    "pdf": "case_038_zh_fapiao.pdf",
+    "json": "case_038_zh_fapiao.json",
+    "language": "zh",
+    "adversarial": null
+  },
+  {
+    "id": "case_039_zh_service",
+    "pdf": "case_039_zh_service.pdf",
+    "json": "case_039_zh_service.json",
+    "language": "zh",
+    "adversarial": null
+  },
+  {
+    "id": "case_040_adv_math_mismatch",
+    "pdf": "case_040_adv_math_mismatch.pdf",
+    "json": "case_040_adv_math_mismatch.json",
+    "language": "en",
+    "adversarial": "math_mismatch"
+  },
+  {
+    "id": "case_041_adv_prompt_injection",
+    "pdf": "case_041_adv_prompt_injection.pdf",
+    "json": "case_041_adv_prompt_injection.json",
+    "language": "en",
+    "adversarial": "prompt_injection"
+  },
+  {
+    "id": "case_042_adv_negative_discount",
+    "pdf": "case_042_adv_negative_discount.pdf",
+    "json": "case_042_adv_negative_discount.json",
+    "language": "en",
+    "adversarial": "negative_item"
+  }
+]

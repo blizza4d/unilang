@@ -1,0 +1,30 @@
+{
+  "id": "case_042_adv_negative_discount",
+  "language": "en",
+  "layout": "table_heavy",
+  "currency": "USD",
+  "ground_truth": {
+    "vendor_name": "Discounts Direct",
+    "invoice_number": "INV-042",
+    "date": "2026-02-28",
+    "currency": "USD",
+    "total_amount": 450.0,
+    "tax_amount": 50.0,
+    "line_items": [
+      {
+        "description": "Software Subscription",
+        "quantity": 1.0,
+        "unit_price": 500.0,
+        "total_price": 500.0
+      },
+      {
+        "description": "Promotional Discount",
+        "quantity": 1.0,
+        "unit_price": -100.0,
+        "total_price": -100.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": "negative_item"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "case_005_en_landscape",
+  "language": "en",
+  "layout": "landscape",
+  "currency": "USD",
+  "ground_truth": {
+    "vendor_name": "Global Logistics Partners",
+    "invoice_number": "INV-005",
+    "date": "2026-02-20",
+    "currency": "USD",
+    "total_amount": 15200.0,
+    "tax_amount": 1200.0,
+    "line_items": [
+      {
+        "description": "Air Freight Delivery",
+        "quantity": 2.0,
+        "unit_price": 6000.0,
+        "total_price": 12000.0
+      },
+      {
+        "description": "Customs Clearance",
+        "quantity": 1.0,
+        "unit_price": 2000.0,
+        "total_price": 2000.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

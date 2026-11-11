@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 
 class Settings(BaseSettings):
+    VERSION: str = "1.0.0-rc.1"
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
