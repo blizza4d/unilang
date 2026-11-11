@@ -1,0 +1,24 @@
+{
+  "id": "case_034_ja_standard",
+  "language": "ja",
+  "layout": "two_col",
+  "currency": "JPY",
+  "ground_truth": {
+    "vendor_name": "Tokyo Precision Technologies KK",
+    "invoice_number": "INV-034",
+    "date": "2026年02月15日",
+    "currency": "JPY",
+    "total_amount": 110000.0,
+    "tax_amount": 10000.0,
+    "line_items": [
+      {
+        "description": "Optical Sensor Module",
+        "quantity": 10.0,
+        "unit_price": 10000.0,
+        "total_price": 100000.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

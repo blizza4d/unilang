@@ -1,0 +1,24 @@
+{
+  "id": "case_018_es_reduced_tax",
+  "language": "es",
+  "layout": "single_col",
+  "currency": "EUR",
+  "ground_truth": {
+    "vendor_name": "Suministros Sanitarios SA",
+    "invoice_number": "INV-018",
+    "date": "20/01/2026",
+    "currency": "EUR",
+    "total_amount": 550.0,
+    "tax_amount": 50.0,
+    "line_items": [
+      {
+        "description": "Material Medico Quirurgico (10% IVA)",
+        "quantity": 1.0,
+        "unit_price": 500.0,
+        "total_price": 500.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

@@ -1,0 +1,24 @@
+{
+  "id": "case_014_fr_inclusive_tax",
+  "language": "fr",
+  "layout": "receipt",
+  "currency": "EUR",
+  "ground_truth": {
+    "vendor_name": "Station Service Autoroute",
+    "invoice_number": "INV-014",
+    "date": "12/02/2026",
+    "currency": "EUR",
+    "total_amount": 120.0,
+    "tax_amount": 20.0,
+    "line_items": [
+      {
+        "description": "Carburant Diesel B7",
+        "quantity": 1.0,
+        "unit_price": 100.0,
+        "total_price": 100.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

@@ -1,0 +1,67 @@
+1
+00:00:01,000 --> 00:00:07,500
+Global companies process thousands of invoices every day across dozens of languages and currencies.
+
+2
+00:00:07,800 --> 00:00:14,800
+Manual data entry is slow, but standard LLMs hallucinate numbers, causing expensive accounting discrepancies.
+
+3
+00:00:15,200 --> 00:00:22,000
+Watch what happens when we upload a German invoice with European comma decimals.
+
+4
+00:00:22,300 --> 00:00:29,500
+Our kinematic companion, Nova, walks to the document and tracks each pipeline stage in real time.
+
+5
+00:00:30,000 --> 00:00:39,000
+Ingestion, OCR Vision, and Structured Extraction stream stage updates over Server-Sent Events.
+
+6
+00:00:40,000 --> 00:00:48,000
+The extraction finishes, but notice the status: Needs Review.
+
+7
+00:00:48,500 --> 00:00:58,000
+DataNova Extract doesn't blindly trust model outputs. Our deterministic arithmetic engine verified the math.
+
+8
+00:00:58,500 --> 00:01:09,000
+It caught that the stated grand total was five hundred euros higher than the sum of items and tax.
+
+9
+00:01:10,000 --> 00:01:17,500
+Pressing 'R' enters Review Mode. Hovering over any field highlights its exact visual bounding box on the source document.
+
+10
+00:01:18,000 --> 00:01:28,000
+We correct the total to two thousand nine hundred seventy-five euros. Instantly, the arithmetic reconciles.
+
+11
+00:01:29,000 --> 00:01:37,000
+The document status upgrades to Approved, and Nova celebrates.
+
+12
+00:01:38,000 --> 00:01:46,000
+We can now export directly to Excel with native formulas, CSV, or an audit-ready PDF.
+
+13
+00:01:47,000 --> 00:01:56,000
+In production, high volume matters. Our batch queue handles up to 20 documents simultaneously.
+
+14
+00:01:56,500 --> 00:02:07,000
+We support non-Latin scripts including Devanagari Hindi GST, Arabic Right-to-Left, Tamil, and CJK.
+
+15
+00:02:08,000 --> 00:02:18,000
+Under the hood, LangGraph orchestrates specialized Vision, Extractor, and Judge agents.
+
+16
+00:02:18,500 --> 00:02:27,000
+Reinforced by strict client-side cost controls and a zero-drift math validator.
+
+17
+00:02:27,500 --> 00:02:35,000
+Try it yourself right now at uni-lang.vercel.app.

@@ -1,0 +1,30 @@
+{
+  "id": "case_008_de_multi_rate",
+  "language": "de",
+  "layout": "table_heavy",
+  "currency": "EUR",
+  "ground_truth": {
+    "vendor_name": "Fachbuch & Schulung Verlag",
+    "invoice_number": "INV-008",
+    "date": "10.01.2026",
+    "currency": "EUR",
+    "total_amount": 535.0,
+    "tax_amount": 35.0,
+    "line_items": [
+      {
+        "description": "Technisches Fachbuch (7% MwSt)",
+        "quantity": 10.0,
+        "unit_price": 30.0,
+        "total_price": 300.0
+      },
+      {
+        "description": "Online Videokurs (19% MwSt)",
+        "quantity": 1.0,
+        "unit_price": 200.0,
+        "total_price": 200.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

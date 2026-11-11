@@ -11,18 +11,27 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        app: "#0A0A0A",
-        panel: "#141414",
-        subtle: "rgba(255, 255, 255, 0.08)",
-        muted: "#888888",
-        bright: "#FDFBF7",
-        "accent-amber": "#F59E0B",
-        "accent-green": "#8EA48C",
-        "accent-red": "#D26A5C",
+        app: "var(--bg-app)",
+        panel: "var(--bg-panel)",
+        elevated: "var(--bg-elevated)",
+        subtle: "var(--border-subtle)",
+        strong: "var(--border-strong)",
+        bright: "var(--text-bright)",
+        body: "var(--text-body)",
+        muted: "var(--text-muted)",
+        faint: "var(--text-faint)",
         accent: {
-          amber: "#F59E0B",
-          green: "#8EA48C",
-          red: "#D26A5C",
+          amber: "var(--accent-amber)",
+          green: "var(--accent-green)",
+          red: "var(--accent-red)",
+          info: "var(--accent-info)",
+          cyan: "var(--accent-cyan)",
+        },
+        droid: {
+          body: "var(--droid-body)",
+          shade: "var(--droid-body-shade)",
+          panel: "var(--droid-panel)",
+          visor: "var(--droid-visor)",
         },
       },
       fontFamily: {
@@ -30,11 +39,17 @@ const config: Config = {
         mono: ["var(--font-mono)", "monospace"],
       },
       borderRadius: {
+        sm: "6px",
+        md: "10px",
+        lg: "14px",
+        xl: "20px",
         xl2: "14px",
       },
       boxShadow: {
-        "glow-green": "0 0 24px 0 rgba(142, 164, 140, 0.15)",
-        "glow-amber": "0 0 24px 0 rgba(245, 158, 11, 0.15)",
+        "glow-green": "var(--glow-green)",
+        "glow-amber": "var(--glow-amber)",
+        "glow-red": "var(--glow-red)",
+        "glow-cyan": "var(--glow-cyan)",
       },
       keyframes: {
         scan: {

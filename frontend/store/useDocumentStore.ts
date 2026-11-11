@@ -56,6 +56,7 @@ export interface DocumentStateValues {
 export interface DocumentStoreActions {
   setFile: (file: File | null) => void;
   resetStore: () => void;
+  cancelProcessing: () => void;
   toggleReviewMode: () => void;
   setReviewMode: (value: boolean) => void;
   setDocType: (type: DocType) => void;
@@ -176,6 +177,14 @@ export const useDocumentStore = create<DocumentStore>()(
           URL.revokeObjectURL(filePreviewUrl);
         }
         set(initialState);
+      },
+
+      cancelProcessing: () => {
+        const { abortController } = get();
+        if (abortController) {
+          abortController.abort();
+        }
+        set({ isProcessing: false, currentStage: null });
       },
 
       toggleReviewMode: () => {

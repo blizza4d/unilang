@@ -1,0 +1,24 @@
+{
+  "id": "case_035_ja_software",
+  "language": "ja",
+  "layout": "single_col",
+  "currency": "JPY",
+  "ground_truth": {
+    "vendor_name": "Kyoto Cloud Software Inc",
+    "invoice_number": "INV-035",
+    "date": "2026年03月01日",
+    "currency": "JPY",
+    "total_amount": 55000.0,
+    "tax_amount": 5000.0,
+    "line_items": [
+      {
+        "description": "SaaS Enterprise Account",
+        "quantity": 1.0,
+        "unit_price": 50000.0,
+        "total_price": 50000.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

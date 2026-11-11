@@ -18,6 +18,7 @@ import { CommandPalette } from "@/components/ui/CommandPalette";
 import { GuidedTour } from "@/components/ui/GuidedTour";
 import { ToastHost } from "@/components/ui/ToastHost";
 import { BackendStatusBanner } from "@/components/ui/BackendStatusBanner";
+import { Footer } from "@/components/layout/Footer";
 import { useDocumentStore } from "@/store/useDocumentStore";
 import { useHistoryStore } from "@/store/useHistoryStore";
 import { useBatchStore } from "@/store/useBatchStore";
@@ -96,7 +97,7 @@ export default function HomePage() {
           </div>
 
           <span className="hidden sm:inline-block text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-muted">
-            v2.0 &bull; LangGraph Control Tower
+            v1.0.0-rc.1 &bull; LangGraph Control Tower
           </span>
         </div>
 
@@ -163,6 +164,9 @@ export default function HomePage() {
           right={<DataExtractorPanel />}
         />
       </div>
+
+      {/* Release Candidate & Operational Telemetry Footer */}
+      <Footer />
 
       {/* Overlays, Modals, and Drawers */}
       <HistorySidebar />

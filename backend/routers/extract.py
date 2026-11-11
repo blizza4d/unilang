@@ -2,7 +2,7 @@ import asyncio
 import hashlib
 import json
 from typing import AsyncGenerator
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +16,25 @@ from services.demo_pipeline import run_demo_pipeline
 from utils.file_parsers import detect_mime, validate_size
 
 router = APIRouter(prefix="/api/v1", tags=["Extraction"])
+
+
+def should_use_demo_mode(request: Request | None, settings: object) -> tuple[bool, str]:
+    if getattr(settings, "FEATURE_DEMO_MODE", False):
+        return True, "explicit_demo_flag"
+    has_openai = bool(getattr(settings, "OPENAI_API_KEY", "") and settings.OPENAI_API_KEY.strip())
+    has_google = bool(getattr(settings, "GOOGLE_API_KEY", "") and settings.GOOGLE_API_KEY.strip())
+    if not has_openai and not has_google:
+        return True, "no_keys_configured"
+    if request:
+        req_state = getattr(request, "state", None)
+        if getattr(req_state, "budget_exceeded", False):
+            return True, "budget_cap_exceeded"
+        live_code = getattr(settings, "LIVE_ACCESS_CODE", "")
+        if live_code and live_code.strip():
+            provided = request.headers.get("X-Live-Access-Code", "")
+            if provided != live_code.strip():
+                return True, "access_code_required"
+    return False, "live_ai"
 
 
 @router.get("/capabilities")
@@ -59,9 +78,9 @@ async def get_capabilities() -> dict[str, object]:
     }
 
 
-
 @router.post("/extract", response_model=FinalDocumentResponse)
 async def extract_invoice_v1(
+    request: Request,
     file: UploadFile = File(...),
     session: AsyncSession = Depends(get_session),
 ) -> FinalDocumentResponse:
@@ -75,12 +94,15 @@ async def extract_invoice_v1(
     validate_size(file_bytes, settings.MAX_UPLOAD_MB)
     detect_mime(file_bytes)
 
-    if settings.FEATURE_DEMO_MODE:
+    use_demo, reason = should_use_demo_mode(request, settings)
+    if use_demo:
         demo_resp = await run_demo_pipeline(file_bytes, file.filename or "")
         return FinalDocumentResponse(
             extracted_data=demo_resp.extracted_data,
             validation_metrics=demo_resp.validation_metrics,
             overall_status=demo_resp.overall_status,
+            source="demo_fixture",
+            is_demo=True,
         )
 
     # Deduplication cache check if persistence is on
@@ -95,7 +117,8 @@ async def extract_invoice_v1(
     main_mod = sys.modules.get("main")
     fn = getattr(main_mod, "aprocess_document", aprocess_document)
     resp = await fn(file_bytes)
-
+    resp.source = "live_llm"
+    resp.is_demo = False
 
     if settings.FEATURE_PERSISTENCE:
         await create_document(
@@ -118,6 +141,7 @@ async def extract_invoice_v1(
 
 @router.post("/extract/v2", response_model=ExtendedDocumentResponse)
 async def extract_invoice_v2(
+    request: Request,
     file: UploadFile = File(...),
     session: AsyncSession = Depends(get_session),
 ) -> ExtendedDocumentResponse:
@@ -131,8 +155,12 @@ async def extract_invoice_v2(
     validate_size(file_bytes, settings.MAX_UPLOAD_MB)
     detect_mime(file_bytes)
 
-    if settings.FEATURE_DEMO_MODE:
-        return await run_demo_pipeline(file_bytes, file.filename or "")
+    use_demo, reason = should_use_demo_mode(request, settings)
+    if use_demo:
+        demo_resp = await run_demo_pipeline(file_bytes, file.filename or "")
+        demo_resp.source = "demo_fixture"
+        demo_resp.is_demo = True
+        return demo_resp
 
     sha = hashlib.sha256(file_bytes).hexdigest()
     if settings.FEATURE_PERSISTENCE:
@@ -142,6 +170,8 @@ async def extract_invoice_v2(
             return ExtendedDocumentResponse.model_validate(raw_dict)
 
     resp = await aprocess_document_v2(file_bytes)
+    resp.source = "live_llm"
+    resp.is_demo = False
 
     if settings.FEATURE_PERSISTENCE:
         await create_document(
@@ -180,14 +210,22 @@ async def extract_invoice_stream(
     validate_size(file_bytes, settings.MAX_UPLOAD_MB)
     detect_mime(file_bytes)
 
+    loop = asyncio.get_running_loop()
+
     def is_cancelled() -> bool:
-        return asyncio.run_coroutine_threadsafe(
-            request.is_disconnected(), asyncio.get_event_loop()
-        ).result()
+        try:
+            future = asyncio.run_coroutine_threadsafe(request.is_disconnected(), loop)
+            return future.result(timeout=0.05)
+        except Exception:
+            return False
+
+    use_demo, reason = should_use_demo_mode(request, settings)
 
     async def sse_generator() -> AsyncGenerator[str, None]:
-        if settings.FEATURE_DEMO_MODE:
+        if use_demo:
             demo_resp = await run_demo_pipeline(file_bytes, file.filename or "")
+            demo_resp.source = "demo_fixture"
+            demo_resp.is_demo = True
             yield f"event: stage\ndata: {json.dumps({'stage': 'prepare', 'status': 'completed', 'duration_ms': 120, 'message': 'Prepared document'})}\n\n"
             await asyncio.sleep(0.5)
             yield f"event: stage\ndata: {json.dumps({'stage': 'vision', 'status': 'completed', 'duration_ms': 600, 'message': 'Spatial OCR transcription'})}\n\n"
@@ -206,6 +244,9 @@ async def extract_invoice_stream(
             if hasattr(item, "stage") and hasattr(item, "status"):
                 yield f"event: stage\ndata: {item.model_dump_json()}\n\n"
             elif hasattr(item, "result"):
+                if hasattr(item.result, "source"):
+                    item.result.source = "live_llm"
+                    item.result.is_demo = False
                 yield f"event: result\ndata: {item.model_dump_json()}\n\n"
             elif hasattr(item, "error_code"):
                 yield f"event: error\ndata: {item.model_dump_json()}\n\n"

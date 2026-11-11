@@ -1,0 +1,24 @@
+{
+  "id": "case_009_de_credit_note",
+  "language": "de",
+  "layout": "single_col",
+  "currency": "EUR",
+  "ground_truth": {
+    "vendor_name": "Hardware Rücknahme Center",
+    "invoice_number": "INV-009",
+    "date": "05.03.2026",
+    "currency": "EUR",
+    "total_amount": -595.0,
+    "tax_amount": -95.0,
+    "line_items": [
+      {
+        "description": "Gutschrift defekter Monitor",
+        "quantity": 1.0,
+        "unit_price": -500.0,
+        "total_price": -500.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

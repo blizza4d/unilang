@@ -1,0 +1,24 @@
+{
+  "id": "case_031_ar_dubai",
+  "language": "ar",
+  "layout": "table_heavy",
+  "currency": "AED",
+  "ground_truth": {
+    "vendor_name": "Emirates Digital Logistics LLC",
+    "invoice_number": "INV-031",
+    "date": "2026-03-10",
+    "currency": "AED",
+    "total_amount": 5250.0,
+    "tax_amount": 250.0,
+    "line_items": [
+      {
+        "description": "Cross Border Transit",
+        "quantity": 5.0,
+        "unit_price": 1000.0,
+        "total_price": 5000.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

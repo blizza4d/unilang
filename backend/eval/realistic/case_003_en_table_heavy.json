@@ -1,0 +1,30 @@
+{
+  "id": "case_003_en_table_heavy",
+  "language": "en",
+  "layout": "table_heavy",
+  "currency": "USD",
+  "ground_truth": {
+    "vendor_name": "Office Supplies Express",
+    "invoice_number": "INV-003",
+    "date": "2026-01-28",
+    "currency": "USD",
+    "total_amount": 890.0,
+    "tax_amount": 70.0,
+    "line_items": [
+      {
+        "description": "Ergonomic Keyboard",
+        "quantity": 5.0,
+        "unit_price": 80.0,
+        "total_price": 400.0
+      },
+      {
+        "description": "Laser Toner Cartridge",
+        "quantity": 4.0,
+        "unit_price": 105.0,
+        "total_price": 420.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

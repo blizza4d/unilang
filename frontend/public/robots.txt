@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://uni-lang.vercel.app/sitemap.xml

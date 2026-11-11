@@ -7,7 +7,13 @@ os.environ["OPENAI_API_KEY"] = "mock-key-for-test"
 os.environ["GOOGLE_API_KEY"] = "mock-key-for-test"
 
 from main import app
-from schemas.document_schemas import ExtractedInvoice, FinalDocumentResponse, LineItem, ValidationScore
+from schemas.document_schemas import (
+    ExtractedInvoice,
+    FinalDocumentResponse,
+    LineItem,
+    ValidationScore,
+    derive_overall_status,
+)
 
 
 @pytest.fixture
@@ -21,7 +27,7 @@ def test_health_endpoint(client):
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
-    assert data["version"] in ("1.0.0", "2.0.0")
+    assert data["version"] in ("1.0.0", "2.0.0", "1.0.0-rc.1")
 
 
 def test_empty_file_upload(client):
@@ -98,3 +104,8 @@ def test_extract_happy_path_mocked(client, monkeypatch):
     data = response.json()
     assert data["extracted_data"]["vendor_name"] == "Test Enterprise"
     assert data["overall_status"] == "APPROVED"
+
+
+def test_derive_overall_status_empty_metrics_fails():
+    """Catches Mutation 9: Empty validation metrics must NEVER yield APPROVED."""
+    assert derive_overall_status([]) == "FAILED", "Empty validation metrics must return FAILED, never APPROVED"

@@ -1,0 +1,24 @@
+{
+  "id": "case_021_hi_gst_clean",
+  "language": "hi",
+  "layout": "two_col",
+  "currency": "INR",
+  "ground_truth": {
+    "vendor_name": "Bharat Electronics Limited",
+    "invoice_number": "INV-021",
+    "date": "2026-01-20",
+    "currency": "INR",
+    "total_amount": 11800.0,
+    "tax_amount": 1800.0,
+    "line_items": [
+      {
+        "description": "Digital Sensor Assembly",
+        "quantity": 10.0,
+        "unit_price": 1000.0,
+        "total_price": 10000.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}

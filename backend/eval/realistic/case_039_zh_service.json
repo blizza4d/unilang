@@ -1,0 +1,24 @@
+{
+  "id": "case_039_zh_service",
+  "language": "zh",
+  "layout": "single_col",
+  "currency": "CNY",
+  "ground_truth": {
+    "vendor_name": "Beijing Cloud Computing Ltd",
+    "invoice_number": "INV-039",
+    "date": "2026-03-08",
+    "currency": "CNY",
+    "total_amount": 6360.0,
+    "tax_amount": 360.0,
+    "line_items": [
+      {
+        "description": "Server Colocation Services",
+        "quantity": 1.0,
+        "unit_price": 6000.0,
+        "total_price": 6000.0
+      }
+    ]
+  },
+  "expected_math_passed": true,
+  "adversarial_type": null
+}
